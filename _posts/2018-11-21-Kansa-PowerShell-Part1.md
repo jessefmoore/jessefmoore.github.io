@@ -2,8 +2,8 @@
 title : "Kansa -How to Get-Started"
 author: Jesse Moore
 date: 2018-11-21 10:00:00 +0800
-categories: [Blue-Teaming, Active-Directory-PowerShell]
-tags: [active-directory,active-directory]
+categories: [Blue-Teaming]
+tags: [active-directory]
 ---
 
 ![image](https://user-images.githubusercontent.com/6413570/163220846-82bcfa78-5b99-4c4c-b326-a2a4d41703af.png)
@@ -162,6 +162,6 @@ cmdlets. Here's an example:
 4. Jon Ketchum : [SANS DFIR YouTube] (https://www.youtube.com/watch?v=ZyTbqpc7H-M)
 
 
-If you find my articles interesting, you can buy me a coffee 
+If you find in my notes interesting, you can buy me a coffee 
 
 <a href="https://www.buymeacoffee.com/jessefmoore"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me Coffee?&emoji=&slug=jessefmoore&button_colour=b86e19&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
