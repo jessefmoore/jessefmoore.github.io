@@ -1,5 +1,5 @@
 ---
-title : "Some - Stuff"
+title : "Morestuff"
 author: Jesse Moore
 date: 2022-04-134 11:17:00 +0800
 categories: [Hackthebox, Hackthebox-Linux, Hackthebox-Medium]
