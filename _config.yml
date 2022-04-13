@@ -16,12 +16,12 @@ lang: en
 prefer_datetime_locale:
 
 # Change to your timezone › http://www.timezoneconverter.com/cgi-bin/findzone/findzone
-timezone: Asia/Kolkata
+timezone: America/Los_Angeles
 
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: 0xStarlight                          # the main title
+title: jessefmoore                          # the main title
 
 tagline: Cyber security, Red Teaming and CTF Writeup's  # it will display as the sub-title
 
@@ -29,26 +29,26 @@ description: >-                        # used by seo meta and the atom feed
   Cyber security, Red Teaming and CTF Writeup's
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
-url: 'https://0xStarlight.github.io'
+url: 'https://jessefmoore.github.io'
 
 github:
-  username: 0xStarlight             # change to your github username
+  username: jessefmoore             # change to your github username
 
 twitter:
-  username: Bhaskarpal__           # change to your twitter username
+  username: jessefmoore           # change to your twitter username
 
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: Bhaskar Pal
-  email: Bhaskarpal347@gmail.com            # change to your email address
+  name: Jesse Moore
+  email: jessefmoore@gmail.com            # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/Bhaskarpal__      # change to your twitter homepage
-    - https://github.com/0xStarlight       # change to your github homepage
+    - https://twitter.com/jessefmoore      # change to your twitter homepage
+    - https://github.com/jessefmoore       # change to your github homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    - https://www.linkedin.com/in/jessefmoore
 
 google_site_verification:               # fill in to your verification string
 
