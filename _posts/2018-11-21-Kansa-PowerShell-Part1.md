@@ -3,7 +3,7 @@ title : "Kansa -How to Get-Started"
 author: Jesse Moore
 date: 2018-11-21 10:00:00 +0800
 categories: [Blue-Teaming, Active-Directory-PowerShell]
-tags: [active-directory,active-directory-enumeration,offensive-powershell,powershell,real-time-monitoring,trusts-enumeration,GPO-enumeration,ACL-enumeration]
+tags: [active-directory,active-directory]
 ---
 
 ![image](https://user-images.githubusercontent.com/59029171/160738694-96fb918c-8506-4302-b9af-d869b772496f.png)
@@ -130,8 +130,6 @@ VERBOSE: Waiting for Get-Hotfix to complete.
 PS C:\Tools\Kansa-master>
 ```
 
- 
-![](https://i.imgur.com/KEzbPUI.png)
 
 ## Running Modules Standalone
 Kansa modules can be run as standalone utilities outside of the Kansa framework. Why might you want to do this? Consider netstat -naob, the
@@ -152,6 +150,7 @@ cmdlets. Here's an example:
 
 # References
 1. Powershell Introdution from : [https://tryhackme.com/room/powershell](https://tryhackme.com/room/powershell)
+2. Kansa adhdproject : [adhdproject.github.io] (https://adhdproject.github.io/#!Windows/Kansa.md#Example_1:_Usage)
 
 
 If you find my articles interesting, you can buy me a coffee 
