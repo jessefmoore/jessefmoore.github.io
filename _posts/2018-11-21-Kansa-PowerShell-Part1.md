@@ -6,11 +6,12 @@ categories: [Blue-Teaming, Active-Directory-PowerShell]
 tags: [active-directory,active-directory]
 ---
 
-![image](https://user-images.githubusercontent.com/59029171/160738694-96fb918c-8506-4302-b9af-d869b772496f.png)
+![image](https://user-images.githubusercontent.com/6413570/163220846-82bcfa78-5b99-4c4c-b326-a2a4d41703af.png)
+
 
 # Introduction
 
-This is a place to keep my notes on various projects
+This is a place to keep my notes on various projects so I don't forget.
 
 If not so, you can give it a read from [here](https://jessefmoore.github.io/posts/Kansa-PowerShell-Part1/).
 
@@ -151,6 +152,7 @@ cmdlets. Here's an example:
 # References
 1. Powershell Introdution from : [https://tryhackme.com/room/powershell](https://tryhackme.com/room/powershell)
 2. Kansa adhdproject : [adhdproject.github.io] (https://adhdproject.github.io/#!Windows/Kansa.md#Example_1:_Usage)
+3. 13Cubed video " [13cubed] (https://www.youtube.com/watch?v=OIT9oaFmXZU)
 
 
 If you find my articles interesting, you can buy me a coffee 
