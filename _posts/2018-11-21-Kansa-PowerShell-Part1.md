@@ -152,6 +152,9 @@ cmdlets. Here's an example:
 .\Get-Netstat.ps1 | ConvertTo-CSV -Delimiter "`t" -NoTypeInformation | % { $_ -replace "`"" } | Set-Content netstat.tsv
 ```
 
+![Image3](https://user-images.githubusercontent.com/6413570/163231486-5e70bfc1-2b09-4e9e-8c15-5f0a2b1b85d4.png)
+
+
 # References
 1. Powershell Introdution from : [https://tryhackme.com/room/powershell](https://tryhackme.com/room/powershell)
 2. Kansa adhdproject : [adhdproject.github.io] (https://adhdproject.github.io/#!Windows/Kansa.md#Example_1:_Usage)
