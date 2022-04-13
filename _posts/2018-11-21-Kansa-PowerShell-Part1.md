@@ -53,6 +53,9 @@ Ensure that you check your execution policies with PowerShell:
 Set-ExecutionPolicy AllSigned | RemoteSigned | Unrestriced
 ```
 
+![image2](https://user-images.githubusercontent.com/6413570/163231082-42b14a36-eff2-4e0e-b098-491169877ae7.png)
+
+
 ## Usage example
 Open an elevated Powershell Prompt (Right-click Run As Administrator)
 
