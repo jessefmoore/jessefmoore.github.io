@@ -83,8 +83,8 @@ theme_mode:  dark # [light|dark]
 img_cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: https://avatars.githubusercontent.com/u/59029171
-
+#avatar: https://avatars.githubusercontent.com/u/59029171
+avatar: https://github.com/jessefmoore/jessefmoore.github.io/blob/fe1ed4a37c9d909724c2d5375196da16e4d03fab/assets/img/favicons/rocky1.png
 # boolean type, the global switch for ToC in posts.
 toc: true
 comments:
