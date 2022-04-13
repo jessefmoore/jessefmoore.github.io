@@ -2,8 +2,8 @@
 title : "SomeNotes - OnWhatever"
 author: Jesse Moore
 date: 2022-04-13 09:26:00 +0800
-categories: [Red-Teaming]
-tags: [windows-local-privilege-escalation]
+categories: [ansible]
+tags: [automation]
 ---
 
 
