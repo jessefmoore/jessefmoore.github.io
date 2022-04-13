@@ -1,80 +1,17 @@
 ---
-title : "Active Directory - Domain Persistence"
-author: Bhaskar Pal
+title : "Domain Persistence - CheatSheet"
+author: Jesse Moore
 date: 2022-04-10 01:45:00 +0010
-categories: [Red-Teaming, Active-Directory-Domain-Persistence]
-tags: [active-directory,amsi-bypass,active-directory-domain-persistence]
+categories: [Domain-Persistence]
+tags: [active-directory]
 ---
 
-![image](https://user-images.githubusercontent.com/59029171/162562772-f1cf1862-cf6e-4b78-9017-e70c1f1801b9.png)
 
 
-# <span style="color:lightblue">Introduction</span>
-
-Welcome to my fifth article in the Red Teaming Series (Active Directory Domain Persistence). I hope everyone has gone through the previous articles of this series which go through the basic concepts required, high-level Domain enumeration explanation, AD/Windows Local Privilege escalation guide and AD Lateral Movement.
-
-If not so, you can give it a read from [here](https://0xstarlight.github.io/categories/red-teaming/).
-
-This guide explains Active-Directory Domain Persistence mainly by creating Golden tickets, Silver tickets, Skeleton Keys, DSRM and multiple ACL attacks in detail. I will also explain those terms that every pentester/red-teamer should control to understand the attacks performed in an Active Directory network. You may refer to this as a Cheat-Sheet also.
-
-I will continue to update this article with new Domain Persistence Methods.
 
 > Throughout the article, I will use [Invoke-Mimikatz](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-Mimikatz.ps1) in performing the persistence on a Windows/Active Directory Domain. If any other tools are required, they will be mentioned at the end.
 
 ---
-
-# <span style="color:lightblue">How does the kerberos system work?</span>
-
-![image](https://user-images.githubusercontent.com/59029171/162563204-52b61852-9cd7-4ac6-99de-33c00350b86e.png)
-
-Let's break down every step from the above diagram and understand how the system and authentication occur between the host systems and the domain controller. I hope you already know the basic roles and functions in an Active Directory environment. With that, let's begin. 
-
-## <span style="color:lightgreen">1. Client Requests a TGT from KDC</span>
-
-1. The privileged user wants to access a specific service from the application or Kerberos enabled server.
-2. The user sends a timestamp to the KDC, which is encrypted and signed with the NTLM hash of the user's password.
-3. The following is required for the KDC to verify if the request is made from the user it claims to be.
-
-## <span style="color:lightgreen">2. KDC sends TGT to Client</span>
-
-4. The KDC receives and decrypts the encrypted timestamp.
-5. The KDC ensures the request comes from the user it claims to be and responds with a Ticket Granting Ticket(TGT) which can grant another ticket.
-6. The sent TGT is encrypted and signed off with the NTML hash of the KRBTG, which is a particular account of the KDC only used for this purpose. This means the TGT can be only read and opened by the KRBTG.
-
-## <span style="color:lightgreen">3. Client requests for a TGS</span>
-
-5. The client receives the TGT, sends it back to the DC and requests a Ticket Granting Service(TGS) a service.
-6. The KDC receives the TGS, decrypts it and does the following validation.
-7. The **only validation** it does is whether it can decrypt the TGT or not. If possible, it assumes all the content inside the TGT is valid. This validation lasts up to **20 minutes** for any TGT request sent to the KDC.
-
-## <span style="color:lightgreen">4. KDC sends TGS with an encrypted session</span>
-
-8. Once the TGT gets decrypted, the KDC responds with the TGS.  
-Note: The KDC has no role other than Privilege role certificate(PRG)
-9. The TGS sent from the KDC is encrypted with the NTML hash of the service the user requested from the application or Kerberos enabled server. This means the TGT can be only read and opened by the application server.
-
-## <span style="color:lightgreen">5. Client sends service ticket</span>
-
-10. The client connects to the application server and presents the TGS it received from the KDC for its requested service.
-11. As the TGS is encrypted with the service account's NTML hash, it decrypts the TGS and then decides whether the user can access the service or not.
-
-## <span style="color:lightgreen">6. Application Server sends the timestamp to the client</span>
-
-12. The client receives the service it requested from the application server.
-13. There is mutual authentication between the client and the application server so that a legit client doesn't end up sending a TGS to a rouge application server.
-
-### <span style="color:#F1C232">Important points to keep in mind</span>
-* NTLM password hash for Kerberos RC4 encryption.
-* Logon Ticket (TGT) provides user auth to DC.
-* Kerberos policy only checked when TGT is created.
-* DC validates user account only when TGT > 20 mins.
-* Service Ticket (TGS) PAC validation is optional & rare. This is a validation check between the KDC and the application server directly.
-	* Server LSASS sends PAC Validation request to DC's netlogon service (NRPC)
-	* If it runs as a service, PAC validation is optional (disabled)
-	* If a service runs as System, it performs server signature verification on the PAC (computer account long-term key).
-
-
-Now, these are the steps of how a Kerberos system works typically. An attacker can abuse every step from the steps mentioned above to gain profit. I assume you have access to the Domain Controller and only require persistence. Since you understand how a Kerberos system works now, we can start on how to abuse these steps.
 
 # <span style="color:lightblue">Golden Ticket</span>
 
@@ -619,7 +556,7 @@ Get-RemoteCachedCredential -ComputerName <computer> -Verbose
 
 If you find my articles interesting, you can buy me a coffee 
 
-<a href="https://www.buymeacoffee.com/0xStarlight"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me an OSCP?&emoji=&slug=0xStarlight&button_colour=b86e19&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
+<a href="https://www.buymeacoffee.com/jessefmoore"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me an Coffee?&emoji=&slug=jessefmoore&button_colour=b86e19&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
 
 
 
