@@ -152,7 +152,8 @@ cmdlets. Here's an example:
 # References
 1. Powershell Introdution from : [https://tryhackme.com/room/powershell](https://tryhackme.com/room/powershell)
 2. Kansa adhdproject : [adhdproject.github.io] (https://adhdproject.github.io/#!Windows/Kansa.md#Example_1:_Usage)
-3. 13Cubed video " [13cubed] (https://www.youtube.com/watch?v=OIT9oaFmXZU)
+3. 13Cubed video : [13cubed] (https://www.youtube.com/watch?v=OIT9oaFmXZU)
+4. Jon Ketchum : [SANS DFIR YouTube] (https://www.youtube.com/watch?v=ZyTbqpc7H-M)
 
 
 If you find my articles interesting, you can buy me a coffee 
