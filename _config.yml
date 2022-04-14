@@ -84,7 +84,7 @@ img_cdn:
 
 # the avatar on sidebar, support local or CORS resources
 #avatar: https://avatars.githubusercontent.com/u/59029171
-avatar: https://github.com/jessefmoore/jessefmoore.github.io/blob/d73e20f0ade8b5bcbdd768142b246b2749f490b7/assets/img/favicons/mstile-150x150.png
+avatar: /assets/img/favicons/mstile-150x150.png
 
 # boolean type, the global switch for ToC in posts.
 toc: true
