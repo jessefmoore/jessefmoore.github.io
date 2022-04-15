@@ -3,7 +3,7 @@ title : "Kansa -How to Get-Started"
 author: Jesse Moore
 date: 2018-11-21 10:00:00 +0800
 categories: [Blue-Teaming]
-tags: [active-directory]
+tags: [active-directory, detection, incident response]
 ---
 
 ![image](https://user-images.githubusercontent.com/6413570/163220846-82bcfa78-5b99-4c4c-b326-a2a4d41703af.png)
@@ -36,9 +36,13 @@ I will cover the following topics under this guide:
 ## What is Kansa & Powershell
 A modular incident response framework in Powershell.
 
-This also allows Powershell to execute .NET functions directly from its shell. Most Powershell commands, called _cmdlets,_ are written in .NET. Unlike other scripting languages and shell environments, the output of these _cmdlets_ are objects - making Powershell somewhat object oriented. This also means that running cmdlets allows you to perform actions on the output object(which makes it convenient to pass output from one _cmdlet_ to another). The normal format of a _cmdlet_ is represented using **Verb-Noun**; for example the _cmdlet_ to list commands is called `Get-Command.`
+This also allows Powershell to execute .NET functions directly from its shell. Most Powershell commands, called _cmdlets,_ are written in .NET. Unlike other scripting languages and shell environments, the output of these _cmdlets_ are objects - making Powershell somewhat object oriented.
 
-Simply download latest build from github, unzip it, and “unblock” the ps1 files.
+Simply download latest build from github
+```
+https://github.com/davehull/Kansa
+```
+unzip it, and “unblock” the ps1 files.
 
 The easiest way to do this if you’re using Powershell v3 or later is to cd to the directory where Kansa resides and do:
 
