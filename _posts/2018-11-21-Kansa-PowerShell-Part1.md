@@ -38,7 +38,15 @@ A modular incident response framework in Powershell.
 
 This also allows Powershell to execute .NET functions directly from its shell. Most Powershell commands, called _cmdlets,_ are written in .NET. Unlike other scripting languages and shell environments, the output of these _cmdlets_ are objects - making Powershell somewhat object oriented.
 
-Simply download latest build from github
+## PreREQS:
+```
+Enable-PSRemoting -Force
+Set-Item wsman:\localhost\client\trustedhosts *
+```
+https://pastebin.com/ve4pPvV3
+
+## Download Install
+Download latest build from github
 ```
 https://github.com/davehull/Kansa
 ```
