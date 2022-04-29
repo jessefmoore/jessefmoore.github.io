@@ -39,11 +39,21 @@ A modular incident response framework in Powershell.
 This also allows Powershell to execute .NET functions directly from its shell. Most Powershell commands, called _cmdlets,_ are written in .NET. Unlike other scripting languages and shell environments, the output of these _cmdlets_ are objects - making Powershell somewhat object oriented.
 
 ## PreREQS:
+
+Run the below on all Windows machines you need to remotely access (So all Windows machines you want Kansa to grab info from).
 ```
 Enable-PSRemoting -Force
 Set-Item wsman:\localhost\client\trustedhosts *
 ```
 https://pastebin.com/ve4pPvV3
+
+Check the Remote PowerShell with these commands
+```
+New-PSSession -ComputerName WIN-AD -Credential campus\Administrator
+Get-PSSESSION
+```
+https://pastebin.com/XJRwvNNC
+
 
 ## Download Install
 Download latest build from github
