@@ -183,6 +183,8 @@ cmdlets. Here's an example:
 3. 13Cubed video : [13cubed] (https://www.youtube.com/watch?v=OIT9oaFmXZU)
 4. Jon Ketchum : [SANS DFIR YouTube] (https://www.youtube.com/watch?v=ZyTbqpc7H-M)
 
+[Kansa for Enterprise Scale Threat Hunting, Jonathan Ketchum.pdf](https://github.com/jessefmoore/jessefmoore.github.io/files/8591403/Kansa.for.Enterprise.Scale.Threat.Hunting.Jonathan.Ketchum.pdf)
+
 
 If you find in my notes interesting, you can buy me a coffee 
 
