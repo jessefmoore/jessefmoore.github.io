@@ -10,7 +10,9 @@ order: 4
 # Whoami
 - I'm a passionate cybersecurity enthusiast and willing to share my knowledge.
 - I’m currently learning **Ansible**
-- I'm currently volunteering at WRCCDC
+- Volunteering on the Operations Team for https://wrccdc.org/
+- Volunteering on the Core Red Team for https://cyberforcecompetition.com/cyberforce/
+- Volunteer on the Red Team for https://twitter.com/prccdc
 - How to reach me **jessefmoore@gmail.com**
 
 # Achievements
@@ -20,6 +22,8 @@ order: 4
 - Achieved Master Degree in Infosec Assurance 
 - Received the certificate of completion for HackerDevOps by BHIS
 - Received the certificate of completion for Empire by BC/Security
+- Contribute to [Atomic Red Team Repo](https://github.com/redcanaryco/atomic-red-team)
+- Develope/run workshops for the University on Purple team cybersecurity.
 
 # Profiles
 
