@@ -2,8 +2,8 @@
 title : "2020-02-HTB-Bastion"
 author: Jesse Moore
 date: 2020-02-07 09:26:00 +0800
-categories: [HTB]
-tags: [Windows]
+categories: [HackTheBox]
+tags: [hacking, Windows, HTB]
 ---
 ![Screenshot 2022-05-18 202633](https://user-images.githubusercontent.com/6413570/169198097-7183d13b-8e54-4aa9-adb7-84f9131e7638.jpg)
 
