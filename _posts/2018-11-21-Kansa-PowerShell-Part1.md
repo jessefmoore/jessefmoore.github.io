@@ -186,6 +186,3 @@ cmdlets. Here's an example:
 [Kansa for Enterprise Scale Threat Hunting, Jonathan Ketchum.pdf](https://github.com/jessefmoore/jessefmoore.github.io/files/8591403/Kansa.for.Enterprise.Scale.Threat.Hunting.Jonathan.Ketchum.pdf)
 
 
-If you find in my notes interesting, you can buy me a coffee 
-
-<a href="https://www.buymeacoffee.com/jessefmoore"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me Coffee?&emoji=&slug=jessefmoore&button_colour=b86e19&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
