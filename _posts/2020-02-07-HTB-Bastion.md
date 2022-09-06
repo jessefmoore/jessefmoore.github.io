@@ -197,9 +197,3 @@ ssh administrator@10.10.10.134
 administrator@BASTION C:\Users\Administrator\Desktop>type root.txt 
 958850b91811676ed6620a9c430e65c8
 ![image](https://user-images.githubusercontent.com/6413570/169199226-f131b09f-a0a0-4e49-9a17-cc31144146f8.png)
-
-
-If you find the notes interesting, you can buy me a coffee 
-
-<a href="https://www.buymeacoffee.com/jessefmoore"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a Coffee?&emoji=&slug=jessefmoore&button_colour=b86e19&font_colour=ffffff&font_family=Poppins&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
-
