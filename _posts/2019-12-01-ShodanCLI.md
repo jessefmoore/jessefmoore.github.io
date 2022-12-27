@@ -1,7 +1,7 @@
 ---
 title : "Shodan CLi - Python"
 author: Jesse Moore
-date: 2019-12-01 08:50:00 +0800
+date: 2022
 categories: [recon]
 tags: [automation]
 ---
