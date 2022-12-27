@@ -24,8 +24,7 @@ sudo pip install shodan
 Code:
 Shodan Search
 
-```
-import shodan
+```import shodan
 SHODAN_API_KEY = "putyourownapikeyhereFROMSHODANwebsite"
 api = shodan.Shodan(SHODAN_API_KEY)
 try:
