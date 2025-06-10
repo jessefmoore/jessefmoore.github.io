@@ -29,7 +29,7 @@ SHODAN_API_KEY = "putyourownapikeyhereFROMSHODANwebsite"
 api = shodan.Shodan(SHODAN_API_KEY)
 try:
     #search Shodan
-    results = api.search('net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,69.91.197.0/24,69.91.198.0/24,69.91.199.0/24,69.91.200.0/24,69.91.201.0/24,69.91.202.0/24,69.91.203.0/24,69.91.204.0/24')
+    results = api.search('net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24')
  
     #show the results
     #print 'Results found:%s % results'total'
@@ -44,8 +44,8 @@ except shodan.APIError, e:
 Use Shodan CLI:
 ```root@kali:~/shodan# shodan init <PUTYOURSHODANAPIKEYhere>
 Successfully initialized
-root@kali:~/shodan# shodan download --limit 400 uwbPublic net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,69.91.197.0/24,69.91.198.0/24,69.91.199.0/24,69.91.200.0/24,69.91.201.0/24,69.91.202.0/24,69.91.203.0/24,69.91.204.0/24
-Search query:           net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,69.91.197.0/24,69.91.198.0/24,69.91.199.0/24,69.91.200.0/24,69.91.201.0/24,69.91.202.0/24,69.91.203.0/24,69.91.204.0/24
+root@kali:~/shodan# shodan download --limit 400 uwbPublic net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24
+Search query:           net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,69.91.197.0/24
 Total number of results:    224
 Query credits left:     199998
 Output file:            COMPPublic.json.gz
@@ -55,8 +55,8 @@ Saved 224 results into file COMPPublic.json.gz
 root@kali:~/shodan#
 ```
 
-```root@kali:~/shodan# shodan download --limit 400 UWB2 net:69.91.205.0/24,69.91.206.0/24,128.208.24.128/25,128.208.50.0/24,128.208.52.0/25,128.208.255.0/24,140.142.14.192/27,140.142.24.192/26,140.142.26.192/26,140.142.158.0/24,140.142.164.0/24
-Search query:           net:69.91.205.0/24,69.91.206.0/24,128.208.24.128/25,128.208.50.0/24,128.208.52.0/25,128.208.255.0/24,140.142.14.192/27,140.142.24.192/26,140.142.26.192/26,140.142.158.0/24,140.142.164.0/24
+```root@kali:~/shodan# shodan download --limit 400 UWB2 net:69.91.205.0/24,69.91.206.0/24,128.208.24.128/25,128.208.50.0/24,128.208.52.0/25,128.208.255.0/24,140.142.14.192/27
+Search query:           net:69.91.205.0/24,69.91.206.0/24,128.208.24.128/25,128.208.50.0/24,128.208.52.0/25,128.208.255.0/24,140.142.14.192/27
 Total number of results:    49
 Query credits left:     199996
 Output file:            UWB2.json.gz
@@ -110,7 +110,7 @@ root@kali:~/shodan#
 
 Shodan Search
 ```
-root@kali:~/shodan# shodan search --fields ip_str,port,hostname,org,os,product net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,69.91.197.0/24,69.91.198.0/24,69.91.199.0/24,69.91.200.0/24,69.91.201.0/24,69.91.202.0/24,69.91.203.0/24,69.91.204.0/24
+root@kali:~/shodan# shodan search --fields ip_str,port,hostname,org,os,product net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,69.91.197.0/24,69.91.198.0/24
  
  
 69.91.197.32    3283            University of Washington                Apple Remote Desktop   
