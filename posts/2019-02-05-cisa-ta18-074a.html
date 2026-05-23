@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US-CERT / CISA Alert TA18-074A Detection | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">on this page</div>
+  <nav>
+    <ul>
+      <li><a href="#overview" style="font-size:12px">Overview</a></li>
+      <li><a href="#script" style="font-size:12px">Detection Script</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/2019-02-05</span>$</div>
+
+  <h1>US-CERT / CISA Alert TA18-074A Detection</h1>
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:1.5rem">
+    2019-02-05 &nbsp;·&nbsp;
+    <span style="color:var(--cyan)">Blue Team</span> &nbsp;
+    <span style="color:var(--cyan)">Detection</span> &nbsp;
+    <span style="color:var(--cyan)">PowerShell</span>
+  </p>
+
+  <p>A PowerShell detection script targeting indicators of compromise from <a href="https://www.cisa.gov/news-events/alerts/2018/03/15/alert-ta18-074a-russian-government-cyber-activity-targeting-energy" target="_blank">US-CERT Alert TA18-074A</a> — Russian government cyber activity targeting energy and critical infrastructure sectors. Built as a Kansa module for enterprise-scale deployment.</p>
+
+  <hr>
+
+  <h2 id="overview">Overview</h2>
+
+  <p>The alert documented TTPs used by Russian state-sponsored actors targeting government entities and critical infrastructure. Key indicators include:</p>
+  <ul>
+    <li>Unauthorized RDP configuration changes</li>
+    <li>Password filter DLL modifications (NotificationPackages)</li>
+    <li>WDigest plaintext credential caching enabled</li>
+    <li>Local account manipulation (backdoor users, renamed Guest/Admin)</li>
+    <li>SMBv1 enabled (EternalBlue exposure)</li>
+    <li>Suspicious scheduled tasks and running services</li>
+    <li>Sysinternals tools (PsExec) registry artifacts</li>
+  </ul>
+
+  <hr>
+
+  <h2 id="script">Kansa Detection Script</h2>
+
+  <p>Contributed to the <a href="https://github.com/davehull/Kansa" target="_blank">Kansa PowerShell IR framework</a> for enterprise deployment. Run via:</p>
+
+  <pre><code>.\kansa.ps1 -Target $env:COMPUTERNAME -ModulePath .\Modules -Verbose</code></pre>
+
+  <pre><code>&lt;#
+.SYNOPSIS
+Get-US-CERT-TA18-074A.ps1 returns data about US-CERT Alert TA18-074A
+.NOTES
+OUTPUT TSV
+Contributed by Jesse Moore
+#&gt;
+
+Write-Host "*****PowerShell_Version******"
+$PSVersionTable.PSVersion.Major
+
+# OS Version
+Write-Host "*****Find OS Version******"
+(Get-WmiObject -class Win32_OperatingSystem).Caption
+(Get-CimInstance Win32_OperatingSystem).version
+Start-Sleep -Second 2
+
+# RDP Configuration
+Write-Host "*****fDenyTSConnections******"
+Get-ItemPropertyValue 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' fDenyTSConnections
+
+# Password Filter DLL (unsigned DLL injection vector)
+Write-Host "*****NotificationPackages******"
+Get-ItemPropertyValue 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' 'Notification Packages'
+Start-Sleep -Second 2
+
+# Cached Logon Count
+Write-host "*****CachedLogonsCount******"
+Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'CachedLogonsCount'
+Start-Sleep -Second 2
+
+# Terminal Server Session Policy
+Write-Host "*****FSingleSessionPerUser******"
+Get-ItemPropertyValue 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' fSingleSessionPerUser
+Start-Sleep -Seconds 2
+
+# PowerShell Execution Policy
+Write-Host "*****ExecutionPolicy******"
+Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell\' -Name ExecutionPolicy
+Start-Sleep -Seconds 2
+
+# Firewall Open Ports (Standard + Domain profiles)
+Write-Host "*****StandardProfile_OpenPorts?******"
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile\GloballyOpenPorts\List' -erroraction 'silentlycontinue'
+Start-Sleep -Seconds 2
+
+Write-Host "*****DomainProfile_OpenPort?******"
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\DomainProfile\GloballyOpenPorts\List' -erroraction 'silentlycontinue'
+Start-Sleep -Seconds 2
+
+# Concurrent RDP Sessions
+Write-Host "*****EnabledConcurrentSessions******"
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\Licensing Core' -Name EnableConcurrentSessions -erroraction 'silentlycontinue'
+Start-Sleep -Seconds 2
+
+Write-Host "*****WinLogonEnabledConcurrentSessions******"
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name EnableConcurrentSessions -erroraction 'silentlycontinue'
+
+Write-Host "*****WinLogonAllowMultipleTSSessions******"
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name AllowMultipleTSSessions -erroraction 'silentlycontinue'
+
+Write-Host "*****TerminalServcsMaxInstanceCount******"
+Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name MaxInstanceCount -erroraction 'silentlycontinue'
+Start-Sleep -Seconds 2
+
+# Special Accounts (Win10+ backdoor user hiding)
+Write-Host "*****WinLogonSpecialAccounts Win10+******"
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+# Login banner / Token filter policy
+Write-Host "*****DontDisplayLastUsername******"
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\system' | Select-Object -Property dontdisplaylastusername -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****LocalAccountTokenFilterPolicy******"
+Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\system' | Select-Object -Property LocalAccountTokenFilterPolicy -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+# SMBv1 Check
+Write-Host "*****SMBv1 Reg Key******"
+Get-Item HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters | ForEach-Object {Get-ItemProperty $_.pspath}
+Start-Sleep -Seconds 2
+
+reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+Start-Sleep -Seconds 2
+
+# Running Services
+Write-Host "*****Services Running******"
+Get-Service | Where-Object -Property Status -eq -Value 'running'
+Start-Sleep -Seconds 5
+
+# Suspicious file presence
+Write-Host "*****LastWriteTime - putty.exe******"
+Get-ItemPropertyValue -Path 'C:\Users\%UserProfile%\Desktop\putty.exe' -Name LastWriteTime,CreationTime -erroraction 'silentlycontinue'
+
+# Local User Checks (backdoor accounts)
+Write-Host "*****LocalUser******"
+Get-LocalUser
+Start-Sleep -Seconds 5
+
+Write-Host "*****LocalAdmin******"
+Get-LocalUser Administrator -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****LocalMS_BACKUP (known IOC)******"
+Get-LocalUser MS_BACKUP -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****Guest renamed (CISGUEST)******"
+Get-LocalUser CISGUEST -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****LocalUser ADMIN Renamed (CISADMIN)******"
+Get-LocalUser CISADMIN -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****LocalGroup Administrators******"
+Get-LocalGroupMember Administrators -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****LocalGroup RDUsers******"
+Get-LocalGroupMember "Remote Desktop Users" -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+Write-Host "*****LocalGroupMember Guest******"
+Get-LocalGroupMember Guests -erroraction silentlycontinue
+Start-Sleep -Seconds 2
+
+# TermService security descriptor (unauthorized expansion)
+Write-Host "*****show security descriptions******"
+"sc sdshow termservice" | cmd
+Start-Sleep -Seconds 2
+
+Write-Host "*****SC qc termserv for StartType Auto******"
+"sc qc termservice" | cmd
+Start-Sleep -Seconds 2
+
+# WDigest (plaintext creds in memory when enabled)
+Write-Host "*****Wdigest useLogonCreds******"
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' UseLogonCredential -ErrorAction SilentlyContinue
+
+# Suspicious file searches
+Write-Host "*****Find Files with CMD.EXE*****"
+"dir /b /s C:\comp*.txt 2> nul" | cmd
+"dir /b /s C:\adm*.txt 2> nul" | cmd
+"dir /b /s C:\con*.txt 2> nul" | cmd
+"dir /b /s C:\dom*.txt 2> nul" | cmd
+"dir /b /s C:\enum*.txt 2> nul" | cmd
+"dir /b /s C:\user*.txt 2> nul" | cmd
+Start-Sleep -Second 3
+
+# LNK file ADS check (Win10+)
+Write-Host "*****Find .LNK files Win10+*****"
+Get-Item -Stream * *.lnk -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 3
+
+# Scheduled Tasks
+Write-Host "*****See ScheduledTasks running Win10+*****"
+schtasks /query
+Start-Sleep -Seconds 3
+
+# Sysinternals artifacts (PsExec EULA = installed)
+Write-Host "*****Look for SysInternals such as PSEXEC*****"
+reg query HKCU\SOFTWARE\Sysinternals 2> null
+Start-Sleep -Seconds 2
+
+# Write Kansa event log entry
+Write-Host "*****New-EventLog written about Kansa Win10+*****"
+New-EventLog -LogName Application -Source "Kansa" -ErrorAction SilentlyContinue
+Write-EventLog -LogName Application -Source "Kansa" -EntryType Information -EventId 7777 -Message "This is Kansa completing a Security Check."
+Eventcreate.exe /L Application -SO "Security-Team" /T Information /ID 1 /D "This is Kansa completing a Security Check."
+
+Write-Host "*****END OF PowerShell Script******"</code></pre>
+
+  <hr>
+
+  <p style="margin-top:2rem"><a href="/posts/">← Back to posts</a></p>
+
+</main>
+</div>
+
+</body>
+</html>

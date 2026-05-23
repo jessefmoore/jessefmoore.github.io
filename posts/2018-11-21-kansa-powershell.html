@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kansa — Getting Started with PowerShell IR | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">on this page</div>
+  <nav>
+    <ul>
+      <li><a href="#intro" style="font-size:12px">Introduction</a></li>
+      <li><a href="#install" style="font-size:12px">Installation</a></li>
+      <li><a href="#usage" style="font-size:12px">Usage</a></li>
+      <li><a href="#standalone" style="font-size:12px">Standalone Modules</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/2018-11-21</span>$</div>
+
+  <h1>Kansa — Getting Started with PowerShell IR</h1>
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:1.5rem">
+    2018-11-21 &nbsp;·&nbsp;
+    <span style="color:var(--cyan)">Blue Team</span> &nbsp;
+    <span style="color:var(--cyan)">PowerShell</span> &nbsp;
+    <span style="color:var(--cyan)">Incident Response</span> &nbsp;
+    <span style="color:var(--cyan)">Active Directory</span>
+  </p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163220846-82bcfa78-5b99-4c4c-b326-a2a4d41703af.png" alt="Kansa logo" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <h2 id="intro">Introduction</h2>
+
+  <p><a href="https://github.com/davehull/Kansa" target="_blank">Kansa</a> is a modular incident response framework written in PowerShell. It allows you to collect data from Active Directory-joined machines at enterprise scale via PowerShell remoting.</p>
+
+  <p>This guide covers:</p>
+  <ol>
+    <li>Install Kansa for one host</li>
+    <li>Usage example</li>
+    <li>Running modules standalone</li>
+  </ol>
+
+  <hr>
+
+  <h2 id="install">Installation</h2>
+
+  <h3>Prerequisites — Enable PSRemoting on all targets</h3>
+
+  <pre><code>Enable-PSRemoting -Force
+Set-Item wsman:\localhost\client\trustedhosts *</code></pre>
+
+  <p>Verify remote PowerShell works:</p>
+
+  <pre><code>New-PSSession -ComputerName WIN-AD -Credential campus\Administrator
+Get-PSSESSION</code></pre>
+
+  <h3>Download and Unblock</h3>
+
+  <pre><code># Download latest build from:
+# https://github.com/davehull/Kansa
+
+# Unblock all ps1 files (PowerShell v3+)
+ls -r *.ps1 | Unblock-File</code></pre>
+
+  <h3>Execution Policy</h3>
+
+  <pre><code>Set-ExecutionPolicy AllSigned
+# or
+Set-ExecutionPolicy RemoteSigned
+# or
+Set-ExecutionPolicy Unrestricted</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163231082-42b14a36-eff2-4e0e-b098-491169877ae7.png" alt="execution policy" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <h2 id="usage">Usage</h2>
+
+  <p>Open an elevated PowerShell prompt and run:</p>
+
+  <pre><code>.\kansa.ps1 -Target $env:COMPUTERNAME -ModulePath .\Modules -Verbose</code></pre>
+
+  <p>Example run against a domain controller:</p>
+
+  <pre><code>PS C:\Tools\Kansa-master> .\kansa.ps1 -Pushbin -Target WIN-AD \
+  -Credential chi.local\administrator -Authentication Negotiate
+
+VERBOSE: Found Modules\Modules.conf.
+
+VERBOSE: Running modules:
+
+Get-PrefetchListing
+Get-Netstat
+Get-DNSCache
+Get-SmbSession
+Get-LogWinEvent
+Get-SchedTasks
+Get-LocalAdmins
+Get-Hotfix
+
+VERBOSE: Waiting for Get-PrefetchListing to complete.
+
+1      Job1    RemoteJob    Completed    True    WIN-AD    &lt;#...
+
+VERBOSE: Waiting for Get-Netstat to complete.
+
+3      Job3    RemoteJob    Completed    True    WIN-AD    &lt;#...
+
+VERBOSE: Waiting for Get-DNSCache to complete.
+
+5      Job5    RemoteJob    Completed    True    WIN-AD    &lt;#...</code></pre>
+
+  <p>Output lands in a new <code>Output_&lt;timestamp&gt;</code> subdirectory with a subfolder per module.</p>
+
+  <hr>
+
+  <h2 id="standalone">Running Modules Standalone</h2>
+
+  <p>Kansa modules work as standalone scripts outside the framework. This is useful for quick one-off collection:</p>
+
+  <pre><code>.\Modules\Net\Get-Netstat.ps1</code></pre>
+
+  <p>Returns PowerShell objects instead of raw netstat output — easy to pipe into CSV, TSV, or XML:</p>
+
+  <pre><code>.\Get-Netstat.ps1 | ConvertTo-CSV -Delimiter "`t" -NoTypeInformation `
+  | % { $_ -replace "`"" } | Set-Content netstat.tsv</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163231486-5e70bfc1-2b09-4e9e-8c15-5f0a2b1b85d4.png" alt="netstat output" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <h2>References</h2>
+  <ol>
+    <li><a href="https://tryhackme.com/room/powershell" target="_blank">TryHackMe — PowerShell Introduction</a></li>
+    <li><a href="https://adhdproject.github.io/#!Windows/Kansa.md#Example_1:_Usage" target="_blank">ADHD Project — Kansa Usage</a></li>
+    <li><a href="https://www.youtube.com/watch?v=OIT9oaFmXZU" target="_blank">13Cubed — Kansa Video</a></li>
+    <li><a href="https://www.youtube.com/watch?v=ZyTbqpc7H-M" target="_blank">SANS DFIR — Jon Ketchum Kansa Talk</a></li>
+  </ol>
+
+  <hr>
+
+  <p style="margin-top:2rem"><a href="/posts/">← Back to posts</a></p>
+
+</main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shodan CLI — Python | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">on this page</div>
+  <nav>
+    <ul>
+      <li><a href="#install" style="font-size:12px">Install</a></li>
+      <li><a href="#python" style="font-size:12px">Python API</a></li>
+      <li><a href="#cli" style="font-size:12px">Shodan CLI</a></li>
+      <li><a href="#parse" style="font-size:12px">Parsing Results</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/2019-12-01</span>$</div>
+
+  <h1>Shodan CLI — Python</h1>
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:1.5rem">
+    2019-12-01 &nbsp;·&nbsp;
+    <span style="color:var(--cyan)">OSINT</span> &nbsp;
+    <span style="color:var(--cyan)">Recon</span>
+  </p>
+
+  <p>Using the Shodan CLI and Python library for attack surface reconnaissance. Shodan is a search engine for internet-connected devices — essential for external footprinting during a red team or pentest engagement.</p>
+
+  <hr>
+
+  <h2 id="install">Install</h2>
+
+  <pre><code>sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install python-setuptools python2.7 python-pip
+sudo pip install shodan</code></pre>
+
+  <hr>
+
+  <h2 id="python">Python API</h2>
+
+  <p>Shodan search using the Python library:</p>
+
+  <pre><code>import shodan
+
+SHODAN_API_KEY = "putyourownapikeyhereFROMSHODANwebsite"
+api = shodan.Shodan(SHODAN_API_KEY)
+
+try:
+    results = api.search('net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24')
+
+    for result in results['matches']:
+        print '%s' % result['ip_str']
+
+except shodan.APIError, e:
+    print 'Error: %s' % e</code></pre>
+
+  <hr>
+
+  <h2 id="cli">Shodan CLI</h2>
+
+  <h3>Initialize</h3>
+
+  <pre><code>shodan init &lt;YOUR_SHODAN_API_KEY&gt;</code></pre>
+
+  <h3>Download Results</h3>
+
+  <pre><code>shodan download --limit 400 uwbPublic \
+  net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24,69.91.195.0/24,69.91.196.0/24,\
+  69.91.197.0/24,69.91.198.0/24,69.91.199.0/24,69.91.200.0/24,69.91.201.0/24,\
+  69.91.202.0/24,69.91.203.0/24,69.91.204.0/24</code></pre>
+
+  <pre><code>Search query:           net:69.91.192.0/24,...
+Total number of results:    224
+Query credits left:     199998
+Output file:            COMPPublic.json.gz
+
+  [###################################-]   99%  00:00:02
+Saved 224 results into file COMPPublic.json.gz</code></pre>
+
+  <h3>Search by Hostname</h3>
+
+  <pre><code>shodan download --limit 400 HostnameUWB \
+  'hostname:uwb org:"University of Washington"'</code></pre>
+
+  <h3>Shodan Host Lookup</h3>
+
+  <p>Get detailed info about a specific host:</p>
+
+  <pre><code>shodan host 69.91.197.32</code></pre>
+
+  <pre><code>69.91.197.32
+Hostnames:               MAC-30239442.uwb.edu
+City:                    Kenmore
+Country:                 United States
+Organization:            University of Washington
+Updated:                 2019-12-11T20:20:48.380125
+Number of open ports:    1
+
+Ports:
+   3283/udp Apple Remote Desktop</code></pre>
+
+  <hr>
+
+  <h2 id="parse">Parsing Results</h2>
+
+  <h3>Parse Downloaded JSON</h3>
+
+  <pre><code>shodan parse --fields ip_str,port --separator , uwbPublic.json.gz</code></pre>
+
+  <pre><code>69.91.197.32,3283
+69.91.197.18,3283
+69.91.193.117,500
+69.91.202.11,3283</code></pre>
+
+  <h3>Rich Field Parse</h3>
+
+  <pre><code>shodan parse --fields ip_str,port,product,org,os --separator , UWB1.json.gz</code></pre>
+
+  <pre><code>69.91.197.32,3283,Apple Remote Desktop,University of Washington,
+69.91.197.18,3283,Apple Remote Desktop,University of Washington,
+69.91.193.117,500,Microsoft,University of Washington,Windows 8</code></pre>
+
+  <h3>Search with Field Output</h3>
+
+  <pre><code>shodan search --fields ip_str,port,hostname,org,os,product \
+  net:69.91.192.0/24,69.91.193.0/24,69.91.194.0/24</code></pre>
+
+  <pre><code>69.91.197.32    3283    University of Washington    Apple Remote Desktop
+69.91.197.18    3283    University of Washington    Apple Remote Desktop
+69.91.193.117   500     University of Washington    Windows 8    Microsoft</code></pre>
+
+  <h3>Grep Filtered Results</h3>
+
+  <pre><code>shodan parse --fields ip_str,port,product,os --separator , UWB1.json.gz | grep "Windows 8"</code></pre>
+
+  <hr>
+
+  <p style="margin-top:2rem"><a href="/posts/">← Back to posts</a></p>
+
+</main>
+</div>
+
+</body>
+</html>

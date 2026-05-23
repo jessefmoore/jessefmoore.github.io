@@ -1,46 +1,64 @@
-# Chirpy Starter [![Gem Version](https://img.shields.io/gem/v/jekyll-theme-chirpy)](https://rubygems.org/gems/jekyll-theme-chirpy) [![GitHub license](https://img.shields.io/github/license/cotes2020/chirpy-starter.svg?color=blue)][mit]
+# jessefmoore.github.io
 
-When installing the [**Chirpy**][chirpy] theme through [RubyGems.org][gem], Jekyll can only read files in the folders `_includes`, `_layout`, `_sass` and `assets`, as well as a small part of options of the `_config.yml` file from the theme's gem. If you have ever installed this theme gem, you can use the command `bundle info --path jekyll-theme-chirpy` to locate these files.
+Personal security blog — pure static HTML. No Jekyll, no build step, no dependencies.
 
-The Jekyll organization claims that this is to leave the ball in the user’s court, but this also results in users not being able to enjoy the out-of-the-box experience when using feature-rich themes.
+## Design
 
-To fully use all the features of **Chirpy**, you need to copy the other critical files from the theme's gem to your Jekyll site. The following is a list of targets:
+Terminal aesthetic inspired by the JFM hacker persona:
+- Dark background (`#0d1117`), IBM Plex Mono, phosphor-green headings
+- Two-column layout: left sidebar (nav + on-page TOC) + main content
+- ASCII art JFM logo in header
+- `.post-card` grid on home page, `.report-card` grid for pentest reports
 
-```shell
+Shared stylesheet: `assets/style.css`
+
+## Structure
+
+```
 .
-├── _config.yml
-├── _data
-├── _plugins
-├── _tabs
-└── index.html
+├── index.html              # Home page — posts list + reports grid
+├── posts/
+│   ├── index.html          # All posts listing
+│   ├── 2026-05-23-claude-code-cli.html
+│   ├── 2020-05-16-htb-heist.html
+│   ├── 2020-02-07-htb-bastion.html
+│   ├── 2019-12-01-shodan-cli.html
+│   ├── 2019-02-05-cisa-ta18-074a.html
+│   ├── 2018-11-21-kansa-powershell.html
+│   ├── 2018-06-01-webapp-pentest.html
+│   └── 2018-03-01-pentest-project.html
+├── reports/
+│   ├── index.html          # Reports listing
+│   └── lehack2024/
+│       ├── report.html     # Standard pentest report (LeHack 2024)
+│       └── casebook.html   # CRT-aesthetic operator casebook (LeHack 2024)
+└── assets/
+    └── style.css           # Global stylesheet
 ```
 
-In order to save your time, and to prevent you from missing some files when copying, we extract those files/configurations of the latest version of the **Chirpy** theme and the [CD][CD] workflow to here, so that you can start writing in minutes.
+## Deployment
 
-## Prerequisites
+GitHub Actions deploys to GitHub Pages on push to `main`:
 
-Follow the instructions in the [Jekyll Docs](https://jekyllrb.com/docs/installation/) to complete the installation of `Ruby`, `RubyGems`, `Jekyll` and `Bundler`.
-
-## Installation
-
-[**Use this template**][use-template] to generate a brand new repository and name it `<GH_USERNAME>.github.io`, where `GH_USERNAME` represents your GitHub username.
-
-Then clone it to your local machine and run:
-
-```
-$ bundle
+```yaml
+# .github/workflows/deploy.yml
+- uses: actions/checkout@v4
+- uses: actions/configure-pages@v5
+- uses: actions/upload-pages-artifact@v3
+  with:
+    path: '.'
+- uses: actions/deploy-pages@v4
 ```
 
-## Usage
+No build step. The entire repo is uploaded as the artifact and served as-is. `.nojekyll` disables Jekyll processing.
 
-Please see the [theme's docs](https://github.com/cotes2020/jekyll-theme-chirpy#documentation).
+## Adding a Post
 
-## License
+1. Create `posts/YYYY-MM-DD-slug.html` — copy the header/sidebar structure from any existing post
+2. Add an entry to `posts/index.html` and to the post list in `index.html`
+3. Update the sidebar "recent posts" in `index.html` if it's one of the 4 most recent
 
-This work is published under [MIT][mit] License.
+## Adding a Report
 
-[gem]: https://rubygems.org/gems/jekyll-theme-chirpy
-[chirpy]: https://github.com/cotes2020/jekyll-theme-chirpy/
-[use-template]: https://github.com/cotes2020/chirpy-starter/generate
-[CD]: https://en.wikipedia.org/wiki/Continuous_deployment
-[mit]: https://github.com/cotes2020/chirpy-starter/blob/master/LICENSE
+1. Create `reports/<slug>/report.html` (and optionally `casebook.html`)
+2. Add an entry to `reports/index.html` and to the reports grid in `index.html`

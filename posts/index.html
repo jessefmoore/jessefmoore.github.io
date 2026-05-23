@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Posts | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/</span>$</div>
+
+  <h1>Posts</h1>
+  <p>Security write-ups, tool guides, and lab notes.</p>
+
+  <hr>
+
+  <ul class="post-list">
+
+    <li class="post-card">
+      <a href="/posts/2026-05-23-claude-code-cli.html" class="post-title">Experimenting with Claude Code CLI in the Home Lab</a>
+      <div class="post-meta">2026-05-23 <span class="tag">AI</span><span class="tag">Pentesting</span><span class="tag">HomeLab</span><span class="tag">Ludus</span></div>
+      <div class="post-excerpt">Teaching Claude to act as an internal pentester using Proxmox + Ludus + a custom NetExec skill. Lessons on structure, security hygiene, and AI-assisted report generation.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2020-05-16-htb-heist.html" class="post-title">HackTheBox — Heist</a>
+      <div class="post-meta">2020-05-16 <span class="tag">HTB</span><span class="tag">Windows</span></div>
+      <div class="post-excerpt">IIS on 80, MSRPC on 135, SMB on 445, WinRM on 5985. Cisco config password crack chain leads to user via CME spray and privesc via Firefox memory dump.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2020-02-07-htb-bastion.html" class="post-title">HackTheBox — Bastion</a>
+      <div class="post-meta">2020-02-07 <span class="tag">HTB</span><span class="tag">Windows</span></div>
+      <div class="post-excerpt">Anonymous SMB share exposes a VHD backup. Mount it with guestmount, extract SAM hashes, crack with CrackStation. Privesc via mRemoteNG encrypted credential extraction.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2019-12-01-shodan-cli.html" class="post-title">Shodan CLI — Python</a>
+      <div class="post-meta">2019-12-01 <span class="tag">OSINT</span><span class="tag">Recon</span></div>
+      <div class="post-excerpt">Using the Shodan CLI and Python library for external attack surface reconnaissance. Includes net-range searches, field parsing, and hostname-based queries.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2019-02-05-cisa-ta18-074a.html" class="post-title">US-CERT / CISA Alert TA18-074A Detection</a>
+      <div class="post-meta">2019-02-05 <span class="tag">Blue Team</span><span class="tag">Detection</span><span class="tag">PowerShell</span></div>
+      <div class="post-excerpt">Kansa PowerShell module targeting IOCs from the CISA TA18-074A Russian state actor advisory — RDP config, WDigest, password filters, backdoor accounts, SMBv1.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2018-11-21-kansa-powershell.html" class="post-title">Kansa — Getting Started with PowerShell IR</a>
+      <div class="post-meta">2018-11-21 <span class="tag">Blue Team</span><span class="tag">PowerShell</span><span class="tag">IR</span></div>
+      <div class="post-excerpt">Setup guide for Kansa, a modular PowerShell incident response framework for AD environments. Covers PSRemoting prereqs, execution policy, usage, and standalone module mode.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2018-06-01-webapp-pentest.html" class="post-title">Web App Pentest Project Overview</a>
+      <div class="post-meta">2018-06-01 <span class="tag">Web App</span><span class="tag">Pentesting</span></div>
+      <div class="post-excerpt">Design framework for a governance-focused web application pentest program. Low-hanging-fruit OWASP scanning at scale with risk team integration.</div>
+    </li>
+
+    <li class="post-card">
+      <a href="/posts/2018-03-01-pentest-project.html" class="post-title">Proposed Pentest Project Considerations</a>
+      <div class="post-meta">2018-03-01 <span class="tag">Pentesting</span><span class="tag">Planning</span></div>
+      <div class="post-excerpt">Requirements and tooling considerations for building an internal penetration testing program. MITRE ATT&amp;CK aligned with AD, web, and physical test coverage.</div>
+    </li>
+
+  </ul>
+
+</main>
+</div>
+
+</body>
+</html>

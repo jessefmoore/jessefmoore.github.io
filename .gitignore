@@ -5,9 +5,17 @@
 !.nojekyll
 !.travis.yml
 
-# bundler cache
+# Jekyll — not used, static HTML only
 _site
+_posts
+_tabs
+_data
+_plugins
 vendor
+Gemfile
+Gemfile.lock
+_config.yml
+tools
 
 # rubygem
 *.gem
