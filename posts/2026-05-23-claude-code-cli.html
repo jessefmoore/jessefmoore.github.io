@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimenting with Claude Code CLI in the Home Lab | jessefmoore</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+<pre class="ascii-logo">     ██╗███████╗███╗   ███╗
+     ██║██╔════╝████╗ ████║
+     ██║█████╗  ██╔████╔██║
+██   ██║██╔══╝  ██║╚██╔╝██║
+╚█████╔╝██║     ██║ ╚═╝ ██║
+ ╚════╝ ╚═╝     ╚═╝     ╚═╝</pre>
+<div class="tagline">Security Advisor | jessefmoore on LinkedIn, X, and GitHub</div>
+</header>
+
+<div class="wrapper">
+
+<aside class="sidebar">
+  <div class="sidebar-label">navigation</div>
+  <nav>
+    <ul>
+      <li><a href="/index.html">~/ home</a></li>
+      <li><a href="/posts/" class="active">~/posts/</a></li>
+      <li><a href="/reports/">~/reports/</a></li>
+    </ul>
+  </nav>
+  <hr class="sidebar-divider">
+  <div class="sidebar-label">on this page</div>
+  <nav>
+    <ul>
+      <li><a href="#workflow" style="font-size:12px">The Workflow</a></li>
+      <li><a href="#takeaways" style="font-size:12px">My Takeaways</a></li>
+      <li><a href="#verdict" style="font-size:12px">The Verdict</a></li>
+      <li><a href="#reports" style="font-size:12px">Reports</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<main class="content">
+
+  <div class="breadcrumb"><span class="prompt">jfm@kali</span>:<span class="path">~/posts/2026-05-23</span>$</div>
+
+  <h1>Experimenting with Claude Code CLI in the Home Lab 🛡️</h1>
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:1.5rem">
+    2026-05-23 &nbsp;·&nbsp;
+    <span style="color:var(--cyan)">AI</span> &nbsp;
+    <span style="color:var(--cyan)">Pentesting</span> &nbsp;
+    <span style="color:var(--cyan)">HomeLab</span> &nbsp;
+    <span style="color:var(--cyan)">Ludus</span> &nbsp;
+    <span style="color:var(--cyan)">RedTeaming</span>
+  </p>
+
+  <p>I've been wanting to get familiar with the Claude Code CLI for a while now, so I finally dedicated some time to put it to the test in my home lab.</p>
+
+  <p>Inspired by some of the cool work I've seen by <a href="https://twitter.com/alleem" target="_blank">@alleem</a> regarding pentesting, I decided to see if I could teach Claude to act as an "internal pentester." My goal was to have it generate reports based on the HackSmarter example report format.</p>
+
+  <hr>
+
+  <h2 id="workflow">The Workflow</h2>
+
+  <p>I used a <strong>Proxmox + Ludus</strong> setup to host the LeHack 2024 environment. I built a Kali machine and gave Claude access to it to run commands, train, and validate the creation of a custom NetExec skill.</p>
+
+  <hr>
+
+  <h2 id="takeaways">My Takeaways</h2>
+
+  <h3>The Learning Curve</h3>
+  <p>It was incredibly insightful, though I definitely had to correct the model quite a bit to keep it on the right workflows.</p>
+
+  <h3>Structure Matters</h3>
+  <p>I realized that Claude performed much better once I created a standardized folder structure including existing scripts. This prevented it from having to "reinvent the wheel" every time we hit a familiar objective.</p>
+
+  <h3>Security Hygiene</h3>
+  <p>I also experimented with having Claude sanitize my secrets automatically — a massive win to ensure I don't accidentally expose credentials when I <code>git push</code>.</p>
+
+  <hr>
+
+  <h2 id="verdict">The Verdict</h2>
+
+  <p>The result was some pretty neat reports, but it required a lot of manual guidance and correction. While AI is a powerful assistant, I think I still enjoy the manual side of pentesting the most.</p>
+
+  <hr>
+
+  <h2 id="reports">Reports</h2>
+
+  <p>I've attached the two reports I generated from my testing of the LeHack 2024 Ludus environment:</p>
+
+  <div class="report-grid">
+    <div class="report-card">
+      <div class="report-title">Standard Pentest Report</div>
+      <div class="report-desc">Traditional markdown-rendered HTML engagement report — findings, evidence, timeline, host matrix, and remediation.</div>
+      <a href="/reports/lehack2024/report.html" class="report-link">View Report →</a>
+    </div>
+    <div class="report-card">
+      <div class="report-title">Operator Casebook</div>
+      <div class="report-desc">Operator casebook style — phosphor-green CRT aesthetic, Mermaid attack graph, TTP matrix, attack chains, and dead-end documentation.</div>
+      <a href="/reports/lehack2024/casebook.html" class="report-link">View Casebook →</a>
+    </div>
+  </div>
+
+  <p>Has anyone else been playing around with CLI agents for security tasks?</p>
+
+  <hr>
+
+  <p style="color:var(--muted);font-size:12px">
+    <code>#InfoSec</code> &nbsp;
+    <code>#Pentesting</code> &nbsp;
+    <code>#ClaudeCode</code> &nbsp;
+    <code>#AI</code> &nbsp;
+    <code>#CyberSecurity</code> &nbsp;
+    <code>#HomeLab</code> &nbsp;
+    <code>#Ludus</code> &nbsp;
+    <code>#RedTeaming</code>
+  </p>
+
+  <p style="margin-top:2rem"><a href="/index.html">← Back to home</a></p>
+
+</main>
+</div>
+
+</body>
+</html>
