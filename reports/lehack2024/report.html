@@ -526,7 +526,7 @@ LDAP  10.3.10.13  389  VILLAGE   [*] ... (domain:armorique.local) (signing:None)
 
 <h4 id="evidence">Evidence<a class="headerlink" href="#evidence" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Command output: <a href="evidence/F01-ldap-signing-not-required/nxc-ldap-signing.txt"><code>nxc-ldap-signing.txt</code></a></li>
+<li>Command output: <code>nxc-ldap-signing.txt</code></li>
 </ul>
 <h4 id="business-impact">Business Impact<a class="headerlink" href="#business-impact" title="Permanent link">&para;</a></h4>
 <p>An unauthenticated attacker on the internal network can coerce a privileged machine account (any Windows host with the Print Spooler or WebClient service reachable) to authenticate to an attacker-controlled relay listener, then relay that authentication into LDAP on the domain controller. With write access via the relayed session, the attacker can stamp an attacker-controlled <code>msDS-KeyCredentialLink</code> "shadow credential" on a tier-0 object or modify discretionary access control list (DACL) entries on tier-0 groups (Domain Admins, Enterprise Admins) — yielding full domain compromise within minutes and without ever needing to crack a password. The same primitive enables full Active Directory data exfiltration via DCSync.</p>
@@ -574,7 +574,7 @@ SMB  10.3.10.12  445  REFERENDUM  [*] ... (domain:rome.local) (signing:False) (S
 
 <h4 id="evidence_1">Evidence<a class="headerlink" href="#evidence_1" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Command output: <a href="evidence/F02-smb-signing-not-required/nxc-smb-signing.txt"><code>nxc-smb-signing.txt</code></a></li>
+<li>Command output: <code>nxc-smb-signing.txt</code></li>
 </ul>
 <h4 id="business-impact_1">Business Impact<a class="headerlink" href="#business-impact_1" title="Permanent link">&para;</a></h4>
 <p>Any standard domain user on the network whose workstation can be tricked into authenticating to an attacker-controlled host (for example, by clicking a UNC link in a phishing email, or by triggering name-resolution fallback on a mistyped share path) hands the attacker an immediate code-execution foothold on METRONUM or REFERENDUM as that user. If the captured user has local-administrator rights on either server, the relay path yields a SYSTEM-level shell directly; if not, the access still enables credential dumping from the user's session memory and lateral movement onto further hosts the user can reach. The two servers also represent staging points for tier-0 attacks against the DCs in the same domain.</p>
@@ -622,7 +622,7 @@ LDAP  10.3.10.13  389  VILLAGE   [*] ... (signing:None) (channel binding:Never)
 
 <h4 id="evidence_2">Evidence<a class="headerlink" href="#evidence_2" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Command output: <a href="evidence/F03-ldap-channel-binding/nxc-ldap-channel-binding.txt"><code>nxc-ldap-channel-binding.txt</code></a></li>
+<li>Command output: <code>nxc-ldap-channel-binding.txt</code></li>
 </ul>
 <h4 id="business-impact_2">Business Impact<a class="headerlink" href="#business-impact_2" title="Permanent link">&para;</a></h4>
 <p>This finding compounds F01: even after LDAP signing is enforced, an attacker with a coerced authentication can still relay the credential over LDAPS unless channel binding is also required. Treated together, F01 and F03 must both be remediated to fully close the LDAP-relay attack surface. The misconfiguration also signals that domain-controller TLS hygiene is incomplete — BABAORUM has no DC certificate, which suggests the AD CS Domain Controller Authentication template was either never deployed or has expired, with downstream impact on any service that requires DC TLS (replication over LDAPS, certificate-based smart card logon).</p>
@@ -674,7 +674,7 @@ SMB  10.3.10.13  445  VILLAGE   [-] Error enumerating shares: STATUS_ACCESS_DENI
 
 <h4 id="evidence_3">Evidence<a class="headerlink" href="#evidence_3" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Command output: <a href="evidence/F04-anonymous-smb-session/nxc-smb-null-auth.txt"><code>nxc-smb-null-auth.txt</code></a></li>
+<li>Command output: <code>nxc-smb-null-auth.txt</code></li>
 </ul>
 <h4 id="business-impact_3">Business Impact<a class="headerlink" href="#business-impact_3" title="Permanent link">&para;</a></h4>
 <p>Pre-attack reconnaissance against the directory becomes cheaper and more reliable while remaining harder for defenders to spot — anonymous SMB queries produce Windows Security Event 4624 entries with logon type 3 and the user name <code>ANONYMOUS LOGON</code>, which most SIEM rules treat as benign noise. The disclosed banner content (domain FQDN, build, signing posture) directly feeds the next stages of attack (selecting which relay path and which Active Directory attack to attempt). Closing this primitive removes a free recon channel and improves the defender's chance of detecting the next attacker who lands on the network.</p>
@@ -724,7 +724,7 @@ SMB  10.3.10.13  445  VILLAGE  Account Lockout Threshold: None
 
 <h4 id="evidence_4">Evidence<a class="headerlink" href="#evidence_4" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Command output: <a href="evidence/F05-anonymous-smb-password-policy-disclosure/nxc-pass-pol-anonymous.txt"><code>nxc-pass-pol-anonymous.txt</code></a></li>
+<li>Command output: <code>nxc-pass-pol-anonymous.txt</code></li>
 </ul>
 <h4 id="business-impact_4">Business Impact<a class="headerlink" href="#business-impact_4" title="Permanent link">&para;</a></h4>
 <p>Defenders lose an early-warning signal — anonymous SAMR queries to LSARPC are invisible to authenticated-logon monitoring and rarely covered by SIEM rules. Worse, the disclosed policy advertises to any unauthenticated network attacker that the domain accepts five-character passwords with no complexity and no lockout (see F06), dramatically lowering the bar for any subsequent password-spray campaign. The disclosure also confirms that the armorique.local forest can be enumerated without any credential, which is itself a defense-in-depth regression.</p>
@@ -775,7 +775,7 @@ Maximum password age:        311 days
 
 <h4 id="evidence_5">Evidence<a class="headerlink" href="#evidence_5" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Policy details: <a href="evidence/F06-weak-domain-password-policy/password-policy-armorique.txt"><code>password-policy-armorique.txt</code></a></li>
+<li>Policy details: <code>password-policy-armorique.txt</code></li>
 </ul>
 <h4 id="business-impact_5">Business Impact<a class="headerlink" href="#business-impact_5" title="Permanent link">&para;</a></h4>
 <p>An attacker with a list of valid usernames — easily obtainable in this environment via Kerberos user enumeration or anonymous RID brute (see F08 for the rome.local case) — can brute-force credentials at line speed indefinitely against armorique.local. Given that real-world users routinely choose short, simple passwords when the policy permits them to, full domain compromise becomes reachable from a single cracked low-privilege account. The lack of password history also means a compromised account stays compromised even after a forced reset, because the prior password can be reused immediately.</p>
@@ -824,7 +824,7 @@ nxc<span class="w"> </span>smb<span class="w"> </span><span class="m">10</span>.
 <p>The downloaded file disclosed the username <code>heftepix</code> and a cleartext password (both redacted in this report — see evidence file). The credential became the first link in the chain leading to local-admin compromise of METRONUM (F09, F10).</p>
 <h4 id="evidence_6">Evidence<a class="headerlink" href="#evidence_6" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Share listing and file content: <a href="evidence/F07-guest-readable-share-credentials/spider-and-content.txt"><code>spider-and-content.txt</code></a></li>
+<li>Share listing and file content: <code>spider-and-content.txt</code></li>
 </ul>
 <h4 id="business-impact_6">Business Impact<a class="headerlink" href="#business-impact_6" title="Permanent link">&para;</a></h4>
 <p>Anyone with network access to rome.local — including an attacker with zero domain credentials — can read corporate credentials from this share thanks to the Guest-fallback misconfiguration (F08). The share is also writable, which means an attacker can drop SCF, URL, or LNK relay-bait files into the share root to coerce SMB authentication from any user who browses the share with Windows Explorer. The recovered cleartext credential directly enabled the next stage of the attack chain (F09), so the share is not merely a hygiene issue — it was the first concrete step on the path to local administrator on METRONUM.</p>
@@ -877,7 +877,7 @@ SMB  10.3.10.12  445  REFERENDUM  [+] rome.local\guest:
 <p>35 real users were extracted from the SAM via Guest-level RID brute, including the eventual lateral-movement target accounts <code>musculus</code>, <code>terry</code>, <code>jesse</code>, and <code>lapsus</code>.</p>
 <h4 id="evidence_7">Evidence<a class="headerlink" href="#evidence_7" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Guest-bind sweep, share listing, RID brute output: <a href="evidence/F08-guest-account-enabled-empty-password/guest-fallback-evidence.txt"><code>guest-fallback-evidence.txt</code></a></li>
+<li>Guest-bind sweep, share listing, RID brute output: <code>guest-fallback-evidence.txt</code></li>
 </ul>
 <h4 id="business-impact_7">Business Impact<a class="headerlink" href="#business-impact_7" title="Permanent link">&para;</a></h4>
 <p>This single misconfiguration is the foot of the entire kill chain. Domain-user enumeration (RID brute yielding 35 user names), share enumeration (revealing <code>SHAREACCESIX</code> — F07), and the credential chain that led to full local-admin on METRONUM (F09 → F10) all start from this primitive. Disabling Guest on rome.local would break the kill chain at step zero — every downstream finding (F07, F09, F10, F11, F12) was reached because an unauthenticated attacker can hold a Guest-level session on every rome.local host. The Guest-fallback behavior additionally makes the misconfiguration impossible for an attacker to miss — even untrained adversaries who do not specifically test <code>guest</code> will land in a Guest session via any username they try.</p>
@@ -926,7 +926,7 @@ python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;
 
 <h4 id="evidence_8">Evidence<a class="headerlink" href="#evidence_8" title="Permanent link">&para;</a></h4>
 <ul>
-<li>FTP authentication, listing, and file content: <a href="evidence/F09-cleartext-credentials-ftp/ftp-plans-content.txt"><code>ftp-plans-content.txt</code></a></li>
+<li>FTP authentication, listing, and file content: <code>ftp-plans-content.txt</code></li>
 </ul>
 <h4 id="business-impact_8">Business Impact<a class="headerlink" href="#business-impact_8" title="Permanent link">&para;</a></h4>
 <p>This is the middle link of a three-step credential chain that ends with local administrator on METRONUM (F10). Each link in the chain requires only the previous one — F07's Guest-readable share yields the FTP credential, F09's FTP file yields the local-admin password, and F10's password-spray identifies the matching local username. Removing any one link would break the chain; removing F09 specifically would force the attacker to brute-force <code>localix</code> blindly instead of receiving the password as a gift.</p>
@@ -975,7 +975,7 @@ WINRM  10.3.10.11  5985  METRONUM  [+] METRONUM\localix:[REDACTED-PASSWORD-2] (P
 
 <h4 id="evidence_9">Evidence<a class="headerlink" href="#evidence_9" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Authentication output and chain narrative: <a href="evidence/F10-localix-local-admin-compromise/localix-pwn3d.txt"><code>localix-pwn3d.txt</code></a></li>
+<li>Authentication output and chain narrative: <code>localix-pwn3d.txt</code></li>
 </ul>
 <h4 id="business-impact_9">Business Impact<a class="headerlink" href="#business-impact_9" title="Permanent link">&para;</a></h4>
 <p>Compromise of a local administrator account on a domain member server gives the attacker (a) the ability to dump SAM hashes (F11), (b) the ability to dump LSA secrets including cleartext domain credentials (F12), (c) lateral-movement primitives via the recovered hashes for pass-the-hash, and (d) a stable full-control beachhead on the host. Critically, every subsequent finding in this engagement (F11, F12) depends on this access. The combination of a predictable username (lab-naming convention) and a password leaked through a credential chain originating in an unauthenticated Guest session means the attacker reached local administrator without ever brute-forcing a credential.</p>
@@ -1031,7 +1031,7 @@ SMB  10.3.10.12  445  REFERENDUM  [-] STATUS_LOGON_FAILURE
 <p>The Administrator hash is unique to METRONUM (good — host isolation works on BABAORUM and REFERENDUM). The <code>localuser</code> NT hash (<code>8846f7eaee8fb117ad06bdd830b7586c</code>) is the well-known hash for the password <code>Password1</code>.</p>
 <h4 id="evidence_10">Evidence<a class="headerlink" href="#evidence_10" title="Permanent link">&para;</a></h4>
 <ul>
-<li>SAM dump and pass-the-hash sweep: <a href="evidence/F11-sam-hash-extraction/sam-dump.txt"><code>sam-dump.txt</code></a></li>
+<li>SAM dump and pass-the-hash sweep: <code>sam-dump.txt</code></li>
 </ul>
 <h4 id="business-impact_10">Business Impact<a class="headerlink" href="#business-impact_10" title="Permanent link">&para;</a></h4>
 <p>The recovered NT hash for METRONUM's built-in Administrator enables silent reuse across any system that shares the same local administrator password, without the password ever being known in cleartext. The hash for <code>localuser</code> is the textbook value for <code>Password1</code>, indicating a weak default password is in use on METRONUM and probably elsewhere — a strong candidate for a follow-up spray. Both hashes represent persistent, non-expiring credentials usable until the underlying passwords are rotated.</p>
@@ -1100,7 +1100,7 @@ BloodHound adminCount=True parse:
 
 <h4 id="evidence_11">Evidence<a class="headerlink" href="#evidence_11" title="Permanent link">&para;</a></h4>
 <ul>
-<li>LSA secrets, foothold validation, BloodHound DA enumeration: <a href="evidence/F12-lsa-secrets-dump/lsa-secrets-and-foothold.txt"><code>lsa-secrets-and-foothold.txt</code></a></li>
+<li>LSA secrets, foothold validation, BloodHound DA enumeration: <code>lsa-secrets-and-foothold.txt</code></li>
 </ul>
 <h4 id="business-impact_11">Business Impact<a class="headerlink" href="#business-impact_11" title="Permanent link">&para;</a></h4>
 <p>The cleartext <code>musculus</code> password gives the attacker a stable, named domain identity authenticated against all three rome.local hosts (with Pwn3d! on METRONUM via both SMB and WinRM). The cached DCC2 hashes give the attacker two additional accounts pending offline crack — critically including <code>jesse</code>, a Domain Administrator candidate. The machine-account secrets give the attacker silver-ticket and constrained-delegation primitives against METRONUM-hosted services at no extra cost. The DPAPI master keys give the attacker offline decryption of any DPAPI-protected blob on the host (browser-saved passwords, RDP credentials, Wi-Fi keys, credential-manager vault entries). The dump is, in effect, a multi-tool persistence kit recovered from a single registry hive.</p>
@@ -1159,7 +1159,7 @@ SMB  10.3.10.12  445  REFERENDUM  [+] rome.local\lapsus:[REDACTED]
 
 <h4 id="evidence_12">Evidence<a class="headerlink" href="#evidence_12" title="Permanent link">&para;</a></h4>
 <ul>
-<li>DPAPI vault decryption output and <code>lapsus</code> validation: <a href="evidence/F13-dpapi-vault-lapsus/dpapi-vault-decryption.txt"><code>dpapi-vault-decryption.txt</code></a></li>
+<li>DPAPI vault decryption output and <code>lapsus</code> validation: <code>dpapi-vault-decryption.txt</code></li>
 </ul>
 <h4 id="business-impact_12">Business Impact<a class="headerlink" href="#business-impact_12" title="Permanent link">&para;</a></h4>
 <p>A single local administrator compromise (F10) plus an LSA dump (F12) cascades into recovery of every credential the host's interactive users ever stored — saved web logins, RDP credentials, browser-cached secrets, Wi-Fi keys, and any third-party application using DPAPI-protected configuration. In this engagement the cascade produced a second-tier domain credential (<code>lapsus</code>) which directly unlocked the LAPS over-delegation (F14) and the path to REFERENDUM compromise (F15, F16). DPAPI-protected secrets are <em>not</em> a meaningful boundary once an attacker reaches local administrator and reads SYSTEM/SECURITY hives — the protection ends where attacker-controlled code begins.</p>
@@ -1209,7 +1209,7 @@ LDAP  10.3.10.10  389  BABAORUM  Computer:REFERENDUM$  User:  Password:[REDACTED
 
 <h4 id="evidence_13">Evidence<a class="headerlink" href="#evidence_13" title="Permanent link">&para;</a></h4>
 <ul>
-<li>LAPS read output as <code>lapsus</code>: <a href="evidence/F14-laps-over-delegation/laps-read-as-lapsus.txt"><code>laps-read-as-lapsus.txt</code></a></li>
+<li>LAPS read output as <code>lapsus</code>: <code>laps-read-as-lapsus.txt</code></li>
 </ul>
 <h4 id="business-impact_13">Business Impact<a class="headerlink" href="#business-impact_13" title="Permanent link">&para;</a></h4>
 <p>A compromised standard user account (Domain Users membership only, no admin rights anywhere in the directory) yields immediate local Administrator on two member servers via a single, audit-cheap LDAP query. The over-delegation pattern is invisible to most BloodHound default reports because the relevant ACEs sit on individual computer objects rather than on a group — defenders without a targeted "who can read LAPS" report will not surface this. The recovered LAPS passwords powered F15 (Pwn3d! on REFERENDUM) and immediately enabled F16 (REFERENDUM secretsdump → jules.cesar cleartext).</p>
@@ -1258,7 +1258,7 @@ WINRM  10.3.10.12  5985  REFERENDUM  [+] REFERENDUM\Administrator:[REDACTED] (Pw
 
 <h4 id="evidence_14">Evidence<a class="headerlink" href="#evidence_14" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Pwn3d! validation across SMB and WinRM: <a href="evidence/F15-laps-referendum-pwn3d/referendum-local-admin.txt"><code>referendum-local-admin.txt</code></a></li>
+<li>Pwn3d! validation across SMB and WinRM: <code>referendum-local-admin.txt</code></li>
 </ul>
 <h4 id="business-impact_14">Business Impact<a class="headerlink" href="#business-impact_14" title="Permanent link">&para;</a></h4>
 <p>REFERENDUM is the second domain-member server in rome.local. Local administrative access provides the SAM-dump and LSA-dump primitives that revealed cleartext <code>jules.cesar</code> (F16), plus all the same DPAPI / pass-the-hash follow-ons described in F11 and F12 for METRONUM. The compromise depends on F14's over-delegation being present — fixing F14 closes F15 by construction.</p>
@@ -1322,7 +1322,7 @@ SMB  10.3.10.12  445  REFERENDUM  [+] rome.local\jules.cesar:[REDACTED]
 
 <h4 id="evidence_15">Evidence<a class="headerlink" href="#evidence_15" title="Permanent link">&para;</a></h4>
 <ul>
-<li>REFERENDUM secretsdump output and <code>jules.cesar</code> validation: <a href="evidence/F16-referendum-secretsdump-julescesar/referendum-secrets.txt"><code>referendum-secrets.txt</code></a></li>
+<li>REFERENDUM secretsdump output and <code>jules.cesar</code> validation: <code>referendum-secrets.txt</code></li>
 </ul>
 <h4 id="business-impact_15">Business Impact<a class="headerlink" href="#business-impact_15" title="Permanent link">&para;</a></h4>
 <p>Three of the four rome.local Windows hosts (METRONUM, REFERENDUM, and any host that loads service identities the same way) cache domain plaintext credentials in LSA secrets. The pattern means: local admin on a member server is, in this environment, equivalent to a fresh domain credential. The credential ladder constructed across F07 → F09 → F10 → F12 → F13 → F14 → F15 → F16 turns one Guest-account misconfiguration (F08) into four distinct domain credentials (<code>musculus</code>, <code>lapsus</code>, <code>jules.cesar</code>, plus <code>heftepix</code> from F07) without a single cracked hash.</p>
@@ -1380,7 +1380,7 @@ SMB  10.3.10.10  445  BABAORUM    [+] rome.local\svc_wikijs:[REDACTED]
 
 <h4 id="evidence_16">Evidence<a class="headerlink" href="#evidence_16" title="Permanent link">&para;</a></h4>
 <ul>
-<li>NT-hash collision audit and crack output: <a href="evidence/F17-svc-wikijs-password-reuse/nt-hash-collision.txt"><code>nt-hash-collision.txt</code></a></li>
+<li>NT-hash collision audit and crack output: <code>nt-hash-collision.txt</code></li>
 </ul>
 <h4 id="business-impact_16">Business Impact<a class="headerlink" href="#business-impact_16" title="Permanent link">&para;</a></h4>
 <p>Service accounts are routinely overlooked in human-facing password rotation campaigns — they sit in application configuration files and stay valid for years. Sharing a service-account password with a user-tier account (<code>jesse2</code>) means: (a) any service-config disclosure or memory scrape that leaks <code>svc_wikijs</code> simultaneously leaks <code>jesse2</code>; (b) rotation of <code>jesse2</code> (e.g., via a forced reset after a phishing incident) leaves the service-bound <code>svc_wikijs</code> valid — the attacker keeps their foothold; (c) the cracked plaintext (<code>[REDACTED-PASSWORD]</code>) is a rockyou-derivative, so any disciplined brute-force attempt would have recovered it independent of this engagement's foothold. In the engagement's narrative this is the credential that, in a real-world attack, would have enabled the F18 escalation without the operator-facilitated Domain Admins addition.</p>
@@ -1435,8 +1435,8 @@ SMB  10.3.10.10  445  BABAORUM  [+] Dumped 39 NTDS hashes to /home/kali/.nxc/log
 
 <h4 id="evidence_17">Evidence<a class="headerlink" href="#evidence_17" title="Permanent link">&para;</a></h4>
 <ul>
-<li>DCSync output and operator-disclosure note: <a href="evidence/F18-jesse2-da-dcsync/ntds-full-dcsync.txt"><code>ntds-full-dcsync.txt</code></a></li>
-<li>Raw NTDS dump: <a href="evidence/raw/ntds-full-dcsync-jesse2.txt"><code>ntds-full-dcsync-jesse2.txt</code></a></li>
+<li>DCSync output and operator-disclosure note: <code>ntds-full-dcsync.txt</code></li>
+<li>Raw NTDS dump: <code>ntds-full-dcsync-jesse2.txt</code></li>
 </ul>
 <h4 id="business-impact_17">Business Impact<a class="headerlink" href="#business-impact_17" title="Permanent link">&para;</a></h4>
 <p>Full domain compromise. Every account in rome.local — including the built-in Administrator, krbtgt, and every privileged identity — is in the attacker's possession as NT hashes (and, for AES-using accounts, as Kerberos keys). The krbtgt hash enables Golden Ticket forging (F22), giving up-to-10-year persistent Domain Admin that survives every password reset except a krbtgt-rotate-twice operation. The <code>jesse</code> hash enables the cross-forest pivot to armorique.local (F19, F20). The Administrator hash enables silent PtH against every host in the forest. The disclosure is complete and irreversible without a full forest tier-0 reset.</p>
@@ -1504,9 +1504,9 @@ Trusted domain list:
 
 <h4 id="evidence_18">Evidence<a class="headerlink" href="#evidence_18" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Cross-forest collision audit with trust verification: <a href="evidence/F19-cross-forest-password-reuse/cross-forest-collision-audit.txt"><code>cross-forest-collision-audit.txt</code></a></li>
-<li>Raw NTDS (rome): <a href="evidence/raw/ntds-full-dcsync-jesse2.txt"><code>ntds-full-dcsync-jesse2.txt</code></a></li>
-<li>Raw NTDS (armorique): <a href="evidence/raw/ntds-full-dcsync-armorique-jesse.txt"><code>ntds-full-dcsync-armorique-jesse.txt</code></a></li>
+<li>Cross-forest collision audit with trust verification: <code>cross-forest-collision-audit.txt</code></li>
+<li>Raw NTDS (rome): <code>ntds-full-dcsync-jesse2.txt</code></li>
+<li>Raw NTDS (armorique): <code>ntds-full-dcsync-armorique-jesse.txt</code></li>
 </ul>
 <h4 id="business-impact_18">Business Impact<a class="headerlink" href="#business-impact_18" title="Permanent link">&para;</a></h4>
 <p>The two AD forests in scope were architecturally isolated — no domain trust, no Kerberos trust, no LDAP referral path. The only mechanism by which a compromise in one forest can propagate to the other is the human / process decision to reuse the same password. Four such reuses are confirmed. The most damaging is <code>jesse↔jesse</code>: identical password on the most privileged identity in both forests. Once an attacker reaches Domain Admin in rome.local (F18), they reach Domain Admin in armorique.local in seconds (F20) — bypassing the security boundary that two separate forests were architected to provide. The three lower-tier collisions (<code>terry↔ldap</code>, <code>epidemais↔prolix</code>, <code>numerobis↔alambix</code>) provide additional pivot footholds and demonstrate the reuse is systemic, not a one-off.</p>
@@ -1561,8 +1561,8 @@ SMB  10.3.10.13  445  VILLAGE  [+] Dumped 33 NTDS hashes
 
 <h4 id="evidence_19">Evidence<a class="headerlink" href="#evidence_19" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Cross-forest PtH walkthrough and DCSync output: <a href="evidence/F20-armorique-cross-forest-pth/cross-forest-pth-armorique.txt"><code>cross-forest-pth-armorique.txt</code></a></li>
-<li>Raw NTDS: <a href="evidence/raw/ntds-full-dcsync-armorique-jesse.txt"><code>ntds-full-dcsync-armorique-jesse.txt</code></a></li>
+<li>Cross-forest PtH walkthrough and DCSync output: <code>cross-forest-pth-armorique.txt</code></li>
+<li>Raw NTDS: <code>ntds-full-dcsync-armorique-jesse.txt</code></li>
 </ul>
 <h4 id="business-impact_19">Business Impact<a class="headerlink" href="#business-impact_19" title="Permanent link">&para;</a></h4>
 <p>The second AD forest in scope (armorique.local) is fully compromised, including its krbtgt and Administrator NT hashes. The architectural decision to isolate armorique.local from rome.local (no trust) was bypassed by a single operational decision (shared password on the <code>jesse</code> identity). All downstream consequences of F18 — Golden Ticket capability, full identity disclosure, irreversible-without-tier-0-reset — apply to armorique.local as well. The total scope of compromise is now both AD forests.</p>
@@ -1611,7 +1611,7 @@ nxc<span class="w"> </span>smb<span class="w"> </span>/tmp/armo_hosts.txt<span c
 
 <h4 id="evidence_20">Evidence<a class="headerlink" href="#evidence_20" title="Permanent link">&para;</a></h4>
 <ul>
-<li>gMSA extract and usage example: <a href="evidence/F21-gmsa-obelix-secret/gmsa-extract.txt"><code>gmsa-extract.txt</code></a></li>
+<li>gMSA extract and usage example: <code>gmsa-extract.txt</code></li>
 </ul>
 <h4 id="business-impact_20">Business Impact<a class="headerlink" href="#business-impact_20" title="Permanent link">&para;</a></h4>
 <p>The gMSA represents a service-bound identity in armorique.local. Possession of the NT hash permits the attacker to authenticate as the service for up to 30 days (until auto-rotation), with whatever rights the service holds. In this engagement we did not exhaustively map the consuming service — the finding is documented as a persistence handle rather than an exploitation primitive in itself, but in a real-world breach response the gMSA's rotation should be forced immediately to invalidate the disclosed secret. The wider lesson: gMSA password auto-rotation does <strong>not</strong> protect against an attacker with DCSync rights — the secret is replicated to every DC and exfiltrated wholesale by DCSync. gMSA is a hygiene improvement for <em>consuming</em> services, not a security boundary against tier-0 compromise.</p>
@@ -1677,7 +1677,7 @@ SMB  10.3.10.10  445  BABAORUM  [+] rome.local\Administrator (Pwn3d!) (Kerberos)
 
 <h4 id="evidence_21">Evidence<a class="headerlink" href="#evidence_21" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Golden Ticket forge walkthrough for both forests: <a href="evidence/F22-krbtgt-golden-ticket-capability/krbtgt-both-forests.txt"><code>krbtgt-both-forests.txt</code></a></li>
+<li>Golden Ticket forge walkthrough for both forests: <code>krbtgt-both-forests.txt</code></li>
 </ul>
 <h4 id="business-impact_21">Business Impact<a class="headerlink" href="#business-impact_21" title="Permanent link">&para;</a></h4>
 <p>Persistent Domain Admin in <strong>both</strong> forests for up to 10 years — independent of every other credential reset, every account disable, and every membership change. Until the krbtgt password is rotated twice in each forest (with full replication between rotations), the attacker holds an authentication primitive that cannot be revoked by any other control. This is the highest-impact persistence primitive available in Active Directory, and it now applies to both in-scope forests simultaneously.</p>
@@ -1758,8 +1758,8 @@ SMB  10.3.10.13  445  VILLAGE     [+] armorique.local\jesse:8a1d6442[REDACTED]  
 
 <h4 id="evidence_22">Evidence<a class="headerlink" href="#evidence_22" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Full PtH sweep output and exclusions: <a href="evidence/F23-pth-validation-sweep/pth-validation-from-ntds.txt"><code>pth-validation-from-ntds.txt</code></a></li>
-<li>Raw sweep log: <a href="evidence/raw/pth-spray-from-ntds.txt"><code>pth-spray-from-ntds.txt</code></a></li>
+<li>Full PtH sweep output and exclusions: <code>pth-validation-from-ntds.txt</code></li>
+<li>Raw sweep log: <code>pth-spray-from-ntds.txt</code></li>
 </ul>
 <h4 id="business-impact_22">Business Impact<a class="headerlink" href="#business-impact_22" title="Permanent link">&para;</a></h4>
 <p>The sweep does not introduce a new vulnerability — it quantifies the breadth of the existing F18 / F20 disclosures. The practical takeaway: after a single DCSync, the attacker holds local administrator on every Windows host in scope across both forests via paired PtH alone, with no further cracking, coercion, or escalation required. This is the operational reality that justifies the tier-0 reset called out in F18 and F20.</p>
@@ -1860,8 +1860,8 @@ SMB  10.3.10.13  445  VILLAGE     [+] armorique.local\jesse:8a1d6442[REDACTED]  
 </table>
 <h4 id="evidence_23">Evidence<a class="headerlink" href="#evidence_23" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Filtered PtH sweep output (writeup-ready): <a href="evidence/F24-pth-validation-domain-wide/pth-validation-domain-wide.txt"><code>pth-validation-domain-wide.txt</code></a></li>
-<li>Raw sweep log (includes the unfiltered <code>localuser</code> rows): <a href="evidence/raw/pth-spray-from-ntds.txt"><code>pth-spray-from-ntds.txt</code></a></li>
+<li>Filtered PtH sweep output (writeup-ready): <code>pth-validation-domain-wide.txt</code></li>
+<li>Raw sweep log (includes the unfiltered <code>localuser</code> rows): <code>pth-spray-from-ntds.txt</code></li>
 </ul>
 <h4 id="business-impact_23">Business Impact<a class="headerlink" href="#business-impact_23" title="Permanent link">&para;</a></h4>
 <p>Same as F23: the sweep quantifies the operational reach of the F18 + F20 disclosures. Post-DCSync the attacker holds local administrator on every Windows host in scope across both forests via paired PtH, with no further work. The filtering note is for engagement-deliverable cleanliness only — the underlying reality is unchanged.</p>
@@ -1931,7 +1931,7 @@ coercer<span class="w"> </span>coerce<span class="w"> </span>-u<span class="w"> 
 
 <h4 id="evidence_24">Evidence<a class="headerlink" href="#evidence_24" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Certipy vulnerable-find output and chain walkthrough: <a href="evidence/F25-adcs-esc8/certipy-vulnerable-find.txt"><code>certipy-vulnerable-find.txt</code></a></li>
+<li>Certipy vulnerable-find output and chain walkthrough: <code>certipy-vulnerable-find.txt</code></li>
 </ul>
 <h4 id="business-impact_24">Business Impact<a class="headerlink" href="#business-impact_24" title="Permanent link">&para;</a></h4>
 <p>ESC8 is a <em>complete</em> compromise primitive on its own — any authenticated user (or anyone who can poison name resolution onto an authenticating Windows host) reaches Domain Admin in <code>armorique.local</code> without ever needing to crack a password or escalate locally. The chain composes with every other ESC* primitive Certipy enumerates and with every coercion technique in the Impacket suite. Even after the F18 / F20 / F28 disclosures are fully remediated (tier-0 reset, gMSA-obelix$ ACL fix, <code>jesse</code> separation), F25 remains a one-shot path to forest compromise until Web Enrollment is restricted. It is therefore Critical and remains so independently of the other findings.</p>
@@ -2035,9 +2035,9 @@ memberOf                  : CN=Protected Users,CN=Users,DC=armorique,DC=local
 
 <h4 id="evidence_25">Evidence<a class="headerlink" href="#evidence_25" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Full chain walkthrough w/ all three auth primitives: <a href="evidence/F26-alambix-constrained-delegation-protected-users/alambix-delegation-and-protected-users.txt"><code>alambix-delegation-and-protected-users.txt</code></a></li>
-<li>Kerberoast TGS-REP + delegation evidence: <a href="evidence/raw/prolix-kerberoast-alambix.txt"><code>prolix-kerberoast-alambix.txt</code></a></li>
-<li>Kerberos auth probe: <a href="evidence/raw/alambix-kerberos-auth.txt"><code>alambix-kerberos-auth.txt</code></a></li>
+<li>Full chain walkthrough w/ all three auth primitives: <code>alambix-delegation-and-protected-users.txt</code></li>
+<li>Kerberoast TGS-REP + delegation evidence: <code>prolix-kerberoast-alambix.txt</code></li>
+<li>Kerberos auth probe: <code>alambix-kerberos-auth.txt</code></li>
 </ul>
 <h4 id="business-impact_25">Business Impact<a class="headerlink" href="#business-impact_25" title="Permanent link">&para;</a></h4>
 <p>In its current state, the configuration is exploitable only by an attacker who already holds the <code>armorique.local\krbtgt</code> hash (and can therefore forge a forwardable TGT regardless of Protected Users restrictions) — which is a superset of what F22 already provides. <strong>However</strong>, the configuration becomes immediately exploitable by anyone holding alambix's AES key the moment Protected Users membership is removed for any reason (Kerberos compatibility issue, accidental cleanup, group restructuring). Because Protected Users is sometimes removed during incident response or admin uplift, this is a latent landmine: a single forward step in normal AD administration could surface forest compromise. Medium rating reflects the current non-exploitability combined with the high-impact, easy-to-trip latency.</p>
@@ -2093,7 +2093,7 @@ Get-ADUser -LDAPFilter '(&amp;(userAccountControl:1.2.840.113556.1.4.803:=167772
 <strong>Affected hosts:</strong> VILLAGE (10.3.10.13)
 <strong>Location:</strong> SMB shares — <code>\\VILLAGE\CertEnroll</code>, <code>\\VILLAGE\NETLOGON</code>, <code>\\VILLAGE\SYSVOL</code></p>
 <h4 id="description_26">Description<a class="headerlink" href="#description_26" title="Permanent link">&para;</a></h4>
-<p>A standard SYSVOL / NETLOGON / share-spider sweep was performed as <code>armorique.local\alambix</code> via Kerberos authentication (impacket ccache + DNS shim to bypass the nxc DNS dependency — see <code>evidence/raw/alambix-kerberos-auth.txt</code>). The intent was to surface any of the usual <code>Groups.xml</code> cpassword, <code>Registry.xml</code> AutoLogon, login-script embedded credentials, or freeform notes in SYSVOL. <strong>Nothing was found.</strong> This is captured as an Informational finding because (a) the absence of a positive result still needs to be documented for engagement completeness, and (b) the cleanliness is itself notable in a CTF context where SYSVOL is usually loaded with bait or genuine misconfigurations.</p>
+<p>A standard SYSVOL / NETLOGON / share-spider sweep was performed as <code>armorique.local\alambix</code> via Kerberos authentication (impacket ccache + DNS shim to bypass the nxc DNS dependency — see <code>alambix-kerberos-auth.txt</code>). The intent was to surface any of the usual <code>Groups.xml</code> cpassword, <code>Registry.xml</code> AutoLogon, login-script embedded credentials, or freeform notes in SYSVOL. <strong>Nothing was found.</strong> This is captured as an Informational finding because (a) the absence of a positive result still needs to be documented for engagement completeness, and (b) the cleanliness is itself notable in a CTF context where SYSVOL is usually loaded with bait or genuine misconfigurations.</p>
 <p>The corresponding positive finding — if any of the SYSVOL credentials had existed — would have been classified as CWE-256 (Plaintext Storage of a Password) or CWE-552 (Files or Directories Accessible to External Parties) and rated Critical depending on the principal exposed. The absence is therefore meaningful as a Summary-of-Strengths bullet.</p>
 <h4 id="discovery_26">Discovery<a class="headerlink" href="#discovery_26" title="Permanent link">&para;</a></h4>
 <p>Spider of every readable share, Kerberos-authenticated:</p>
@@ -2133,8 +2133,8 @@ SMB  10.3.10.13  445  VILLAGE  [-] gpp_autologin: no Registry.xml with AutoAdmin
 
 <h4 id="evidence_26">Evidence<a class="headerlink" href="#evidence_26" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Spider summary + module output: <a href="evidence/F27-alambix-share-spider-clean/alambix-share-spider.txt"><code>alambix-share-spider.txt</code></a></li>
-<li>Kerberos auth probe (proves the spider was authenticated end-to-end): <a href="evidence/raw/alambix-kerberos-recon.txt"><code>alambix-kerberos-recon.txt</code></a></li>
+<li>Spider summary + module output: <code>alambix-share-spider.txt</code></li>
+<li>Kerberos auth probe (proves the spider was authenticated end-to-end): <code>alambix-kerberos-recon.txt</code></li>
 </ul>
 <h4 id="business-impact_26">Business Impact<a class="headerlink" href="#business-impact_26" title="Permanent link">&para;</a></h4>
 <p>No direct impact from F27 itself. The finding records a closed attack avenue and supports a Summary-of-Strengths bullet: the <code>armorique.local</code> SYSVOL hygiene is unusually clean for a CTF environment. In a real-world engagement this absence still warrants documentation — operators reviewing the report should know that SYSVOL was checked and was clean rather than assuming it was skipped.</p>
@@ -2226,9 +2226,9 @@ Outbound ACEs        : GetChanges, GetChangesAll on ARMORIQUE.LOCAL domain root
 
 <h4 id="evidence_27">Evidence<a class="headerlink" href="#evidence_27" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Full chain walkthrough (Hop 1 + Hop 2 + recovered hashes): <a href="evidence/F28-alambix-gmsa-dcsync-chain/alambix-gmsa-dcsync-chain.txt"><code>alambix-gmsa-dcsync-chain.txt</code></a></li>
-<li>BloodHound shortest-path extract: <a href="evidence/raw/alambix-gmsa-shortest-path.txt"><code>alambix-gmsa-shortest-path.txt</code></a></li>
-<li>Full DCSync output via gMSA: <a href="evidence/raw/alambix-gmsa-dcsync-full-chain.txt"><code>alambix-gmsa-dcsync-full-chain.txt</code></a></li>
+<li>Full chain walkthrough (Hop 1 + Hop 2 + recovered hashes): <code>alambix-gmsa-dcsync-chain.txt</code></li>
+<li>BloodHound shortest-path extract: <code>alambix-gmsa-shortest-path.txt</code></li>
+<li>Full DCSync output via gMSA: <code>alambix-gmsa-dcsync-full-chain.txt</code></li>
 </ul>
 <h4 id="business-impact_27">Business Impact<a class="headerlink" href="#business-impact_27" title="Permanent link">&para;</a></h4>
 <p>Total <code>armorique.local</code> forest compromise, reachable from a regular domain user with no admin rights anywhere in the forest. The chain bypasses every account-tier control that an organization typically relies on (<code>alambix</code> is not in any privileged group, is not in any LAPS-reader group, is not Tier-0 by any normal definition) by routing through a misconfigured ACE on a service account that itself bypasses the tier model. The recovered <code>krbtgt</code> enables persistent Golden Ticket forgery (F22) for up to 10 years in <code>armorique.local</code>, independent of F18 / F20 / F22's other recovery paths.</p>
