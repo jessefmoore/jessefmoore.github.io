@@ -73,6 +73,48 @@ section { padding: 6vw 7vw; border-top: 1px solid var(--line); position: relativ
   animation: blink 1.6s ease-in-out infinite;
 }
 @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+
+/* --- kill-chain replay ("video" playback) --- */
+.kc { border:1px solid var(--line-2); border-radius:6px; background:linear-gradient(180deg, rgba(0,255,156,.03), transparent 60%); padding:18px; }
+.kc-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+.kc-btn { font-family:'IBM Plex Mono'; font-size:13px; cursor:pointer; padding:7px 13px; border:1px solid var(--line-2); border-radius:4px; background:var(--panel); color:var(--text); transition:all .2s; }
+.kc-btn:hover { border-color:var(--green); color:var(--green); box-shadow:0 0 10px rgba(0,255,156,.2); }
+.kc-btn.play { border-color:var(--green-d); color:var(--green); min-width:84px; }
+.kc-speeds { display:inline-flex; gap:4px; margin-left:6px; }
+.kc-speed { font-family:'IBM Plex Mono'; font-size:11px; cursor:pointer; padding:6px 9px; border:1px solid var(--line); border-radius:3px; background:transparent; color:var(--muted); }
+.kc-speed.sel { color:var(--bg); background:var(--green); border-color:var(--green); font-weight:600; }
+.kc-counter { font-family:'IBM Plex Mono'; font-size:12px; color:var(--muted); margin-left:auto; }
+.kc-counter b { color:var(--green); }
+.kc-progress { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:16px; cursor:pointer; }
+.kc-progress-fill { height:100%; width:0; background:linear-gradient(90deg, var(--cyan), var(--green)); box-shadow:0 0 8px var(--green); transition:width .25s linear; }
+
+/* --- kill-chain replay: interactive SVG attack graph (pivot topology / forensic edges) --- */
+@keyframes kc-nodepulse { 0%{ filter:drop-shadow(0 0 1px rgba(0,255,156,.5)); } 50%{ filter:drop-shadow(0 0 12px rgba(0,255,156,1)); } 100%{ filter:drop-shadow(0 0 1px rgba(0,255,156,.5)); } }
+.kc-graph { width:100%; overflow:auto; border:1px solid var(--line-2); border-radius:6px; margin-bottom:14px;
+  background: radial-gradient(900px 500px at 25% 0%, rgba(0,255,156,.05), transparent 60%), radial-gradient(700px 400px at 90% 100%, rgba(88,166,255,.05), transparent 60%), var(--bg-1); }
+.kc-svg { display:block; }
+.kc-lane { fill:rgba(255,255,255,.012); stroke:rgba(255,255,255,.05); }
+.kc-lanelbl { font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:.25em; fill:var(--dim); text-transform:uppercase; }
+.kc-edge { stroke:var(--line-2); stroke-width:2; fill:none; opacity:.3; transition:stroke .35s, opacity .35s, filter .35s, stroke-width .35s; }
+.kc-edge.fired { opacity:.95; stroke:var(--green); stroke-width:2.5; filter:drop-shadow(0 0 5px var(--green)); }
+.kc-edge.p1.fired { stroke:var(--amber); filter:drop-shadow(0 0 5px var(--amber)); }
+.kc-edge.p4.fired { stroke:var(--violet); filter:drop-shadow(0 0 5px var(--violet)); }
+.kc-edge.p3.fired, .kc-edge.p5.fired { stroke:var(--red); filter:drop-shadow(0 0 5px var(--red)); }
+.kc-elabel { font-family:'IBM Plex Mono'; font-size:9.5px; fill:var(--dim); opacity:0; transition:opacity .35s; }
+.kc-elabel.fired { opacity:.95; fill:var(--text); }
+.kc-node { cursor:pointer; opacity:.4; transition:opacity .35s; }
+.kc-node.on { opacity:1; }
+.kc-node.live > rect { animation:kc-nodepulse 1.1s ease-in-out; }
+.kc-node > rect { fill:var(--panel); stroke:var(--line-2); stroke-width:1.5; }
+.kc-node.np0 > rect { stroke:var(--cyan); }   .kc-node.npop > rect { stroke:var(--green); fill:rgba(0,255,156,.06); }
+.kc-node.np1 > rect { stroke:var(--amber); }   .kc-node.np2 > rect { stroke:var(--cyan); }
+.kc-node.np3 > rect, .kc-node.np5 > rect { stroke:var(--red); }   .kc-node.np4 > rect { stroke:var(--violet); }
+.kc-node.on.np3 > rect, .kc-node.on.np5 > rect { fill:rgba(255,59,59,.07); }
+.kc-node.on.np1 > rect { fill:rgba(255,184,0,.06); }   .kc-node.on.np4 > rect { fill:rgba(192,132,252,.07); }
+.kc-nt { font-family:'IBM Plex Mono'; font-size:11px; font-weight:600; fill:var(--text); }
+.kc-ns { font-family:'IBM Plex Mono'; font-size:10px; fill:var(--muted); }
+.kc-detail { font-family:'IBM Plex Mono'; font-size:12px; color:var(--muted); border:1px solid var(--line); border-left:3px solid var(--green-d); border-radius:4px; padding:10px 12px; background:var(--panel); min-height:20px; }
+.kc-detail b { color:var(--green); }
 h2 {
   font-family: 'Fraunces', Georgia, serif; font-weight: 600;
   font-size: clamp(30px, 4.4vw, 62px);
@@ -604,16 +646,17 @@ body.js-fade .reveal:not(.in) { opacity: 0; transform: translateY(20px); }
 <a href="#sec-story" data-num="03">The Story</a>
 <a href="#sec-master-timeline" data-num="04">Master Timeline</a>
 <a href="#sec-graph" data-num="05">Attack Graph</a>
-<a href="#sec-act1" data-num="06">Act I</a>
-<a href="#sec-act2" data-num="07">Act II</a>
-<a href="#sec-act3" data-num="08">Act III</a>
-<a href="#sec-act4" data-num="09">Act IV</a>
-<a href="#sec-act5" data-num="10">Act V</a>
-<a href="#sec-hosts" data-num="11">Host Grid</a>
-<a href="#sec-ttp" data-num="12">TTP Matrix</a>
-<a href="#sec-chains" data-num="13">Attack Chains</a>
-<a href="#sec-dead-ends" data-num="14">Dead Ends</a>
-<a href="#sec-close" data-num="15">Closed</a>
+<a href="#sec-replay" data-num="06">Kill-Chain Replay</a>
+<a href="#sec-act1" data-num="07">Act I</a>
+<a href="#sec-act2" data-num="08">Act II</a>
+<a href="#sec-act3" data-num="09">Act III</a>
+<a href="#sec-act4" data-num="10">Act IV</a>
+<a href="#sec-act5" data-num="11">Act V</a>
+<a href="#sec-hosts" data-num="12">Host Grid</a>
+<a href="#sec-ttp" data-num="13">TTP Matrix</a>
+<a href="#sec-chains" data-num="14">Attack Chains</a>
+<a href="#sec-strengths" data-num="15">Strengths</a>
+<a href="#sec-close" data-num="16">Closed</a>
   </div>
 </nav>
 
@@ -656,7 +699,7 @@ body.js-fade .reveal:not(.in) { opacity: 0; transform: translateY(20px); }
         <span class="l3">// LEHACK2024</span>
       </h1>
       <p class="subhead">
-        Internal AD penetration test against <b>Lehack2024</b> · scope
+        Security assessment against <b>Lehack2024</b> · scope
         <code>10.3.10.0/24</code> · testing model <b>Black Box</b> ·
         <b>12</b> Critical / <b>8</b> High /
         <b>4</b> Medium / <b>1</b> Low /
@@ -708,15 +751,15 @@ body.js-fade .reveal:not(.in) { opacity: 0; transform: translateY(20px); }
     <div class="sev-lvl">
       <div class="lab">Severity</div>
       <div class="val">CRITICAL</div>
-      <div class="sub">Identity-tier breach · full AD compromise</div>
+      <div class="sub">Highest-rated issue: LDAP Signing Not Required on Domain Controllers</div>
     </div>
     <div class="sev-grid">
       <div class="sg"><div class="k">Findings (Critical)</div><div class="v red">12</div><div class="d">of 28 total</div></div>
       <div class="sg"><div class="k">Findings (High)</div><div class="v amber">8</div><div class="d">substantial uplift</div></div>
-      <div class="sg"><div class="k">Recoverability</div><div class="v red">krbtgt extracted</div><div class="d">2× rotation required</div></div>
-      <div class="sg"><div class="k">Cross-forest blast</div><div class="v amber">Documented</div><div class="d">password reuse audit</div></div>
-      <div class="sg"><div class="k">Data exfil</div><div class="v">NTDS dual-forest</div><div class="d">via DCSync chains</div></div>
-      <div class="sg"><div class="k">Regulatory</div><div class="v amber">Domain-tier</div><div class="d">tier-0 secrets disclosed</div></div>
+      <div class="sg"><div class="k">Outcome</div><div class="v red">Privileged access</div><div class="d">see findings</div></div>
+      <div class="sg"><div class="k">Hosts compromised</div><div class="v amber">4</div><div class="d">BABAORUM, METRONUM, REFERENDUM, VILLAGE</div></div>
+      <div class="sg"><div class="k">Dwell / window</div><div class="v">~6h 22m</div><div class="d">28 logged actions</div></div>
+      <div class="sg"><div class="k">Testing model</div><div class="v amber">Black Box</div><div class="d">complete</div></div>
     </div>
   </div>
 
@@ -750,68 +793,66 @@ body.js-fade .reveal:not(.in) { opacity: 0; transform: translateY(20px); }
       <div class="rm-col p0">
         <div class="rm-h">Immediate containment</div>
         <ul>
-          <li>Rotate <b>krbtgt × 2</b> (48h apart) in every compromised forest</li>
-          <li>Reset every account in NTDS; force password change at next logon</li>
-          <li>Disable Guest accounts on all in-scope DCs and member servers</li>
-          <li>Restrict <code>ReadGMSAPassword</code> to tier-0 admin groups</li>
-          <li>Audit gMSAs for DCSync-equivalent rights (<code>GetChanges*</code> on domain root)</li>
-          <li>Reset LAPS-managed local-admin passwords on every host</li>
+          <li><b>F01</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F02</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F03</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F04</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F05</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F06</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F07</b> · <b>Immediate (0–7 days):</b></li>
+<li><b>F08</b> · <b>Immediate (0–7 days):</b></li>
         </ul>
       </div>
       <div class="rm-col p1">
         <div class="rm-h">Hardening &amp; Detection</div>
         <ul>
-          <li>Enforce LDAP signing + channel binding (<code>LdapEnforceChannelBinding=2</code>) on all DCs</li>
-          <li>Enforce SMB signing required on every member server</li>
-          <li>Disable LLMNR/NBT-NS/mDNS via GPO</li>
-          <li>Audit ADCS templates; disable HTTP web enrollment (ESC8)</li>
-          <li>Move privileged accounts into <b>Protected Users</b> security group</li>
-          <li>Enable Credential Guard on all member servers</li>
+          <li><b>F01</b> · Set the Group Policy <code>Domain controller: LDAP server signing requirements</code> to <b>Require signing</b> in the Default Domain Controllers Policy, then reboot each DC and verify with <code>nxc ldap &lt;dc&gt;</code> that the banner reports <code>signing:Required</code>.</li>
+<li><b>F01</b> · Audit any application accounts authenticating to LDAP without signing and remediate or document exceptions before policy rollout. <b>Short-term (1–4 weeks):</b></li>
+<li><b>F01</b> · Inventory legacy clients / line-of-business applications that may break when signing is enforced; remediate the holdouts or move them to LDAPS with channel binding (see F03).</li>
+<li><b>F01</b> · Add SIEM detection for unsigned LDAP bind attempts to identify residual misconfigured callers. <b>Long-term (1–6 months):</b></li>
+<li><b>F01</b> · Disable NTLM domain-wide where feasible (Kerberos-only authentication), and enforce LDAPS-only for cross-tier authentication paths.</li>
+<li><b>F01</b> · Bake the LDAP-signing requirement into the domain-controller baseline GPO so freshly promoted DCs inherit the setting.</li>
+<li><b>F02</b> · Enable SMB signing required via Group Policy <code>Microsoft network server: Digitally sign communications (always)</code> on METRONUM and REFERENDUM (and any other member server currently reporting <code>signing:False</code>).</li>
+<li><b>F02</b> · Re-run <code>nxc smb &lt;subnet&gt;</code> after the change to confirm all hosts now report <code>signing:True</code>. <b>Short-term (1–4 weeks):</b></li>
         </ul>
       </div>
       <div class="rm-col p2">
         <div class="rm-h">Architectural</div>
         <ul>
-          <li>Adopt Microsoft Tier 0/1/2 administrative model</li>
-          <li>Eliminate cross-forest identity password reuse via SSO/federation</li>
-          <li>Deploy Windows LAPS for unique rotated local-admin passwords</li>
-          <li>Replace cleartext-storing services (FTP) with authenticated SFTP</li>
-          <li>Deploy banned-password lists (Azure AD Password Protection)</li>
-          <li>Quarterly purple-team replay of this attack chain</li>
+          <li>No items at this horizon — see detailed findings.</li>
         </ul>
       </div>
     </div>
   </div>
 
   <div class="residual-note">
-    <b>Residual risk.</b> With <code>ntds.dit</code> contents extracted from both forests, every domain password
-    hash is compromised <b>permanently</b>. Double krbtgt rotation stops golden-ticket forgery against new
-    sessions, but offline cracking of lifted NTDS yields plaintext for any account that isn't forced to rotate.
-    Treat this as a <b>full identity-tier breach</b>, not a host-tier incident.
+    <b>Residual risk.</b> The chain ended in <b>privileged access</b> on <b>BABAORUM, METRONUM, REFERENDUM, VILLAGE</b>. Until every credential, key, and secret exposed along the documented path is rotated, treat the affected systems as compromised. Re-test after remediation to confirm the chain is broken.
   </div>
 </section>
 
 
 <section class="reveal" id="sec-story" style="background: linear-gradient(180deg, rgba(0,255,156,.025), transparent 40%);">
-  <div class="section-tag">// 02 · the story · zero to dual-forest DA</div>
-  <h2>From zero credentials to <em>two forests</em> in one window.</h2>
+  <div class="section-tag">// 02 · the story</div>
+  <h2>How the chain <em>actually</em> ran.</h2>
 
   <div class="story-stats">
-    <div class="ss"><div class="n">12</div><div class="l">Critical findings</div></div>
-    <div class="ss"><div class="n">8</div><div class="l">High findings</div></div>
-    <div class="ss"><div class="n">28</div><div class="l">logged actions</div></div>
-    <div class="ss red"><div class="n">2</div><div class="l">independent chains to DA</div></div>
-    <div class="ss"><div class="n">2</div><div class="l">forests compromised</div></div>
-    <div class="ss red"><div class="n">∞</div><div class="l">krbtgt hashes, permanently</div></div>
+    <div class="ss "><div class="n">12</div><div class="l">Critical findings</div></div>
+    <div class="ss "><div class="n">8</div><div class="l">High findings</div></div>
+    <div class="ss "><div class="n">28</div><div class="l">logged actions</div></div>
+    <div class="ss red"><div class="n">4</div><div class="l">hosts compromised</div></div>
+    <div class="ss "><div class="n">~6h 22m</div><div class="l">window</div></div>
+    <div class="ss "><div class="n">—</div><div class="l">objective</div></div>
   </div>
 
   <div class="story-prose">
-    <p>The Lehack2024 engagement reached <b>12 Critical findings</b> across <b>28 logged operator actions</b>. The chain ran end-to-end from zero credentials through Guest fallback, share looting, local-admin compromise, LSA secrets, LAPS read over-delegation, and finally DCSync on two independent paths.</p>
-<p><b>F01 — LDAP Signing Not Required on Domain Controllers.</b> Both domain controllers in scope permit unsigned Lightweight Directory Access Protocol (LDAP) binds. When LDAP signing is not enforced, an authenticated NTLM session relayed onto the LDAP service by a network-positioned attacker is accepted without integrity validation. Combined with NTLM authentication coercion primitives (PetitPotam, PrinterBug, DFSCoerce) or LLMNR / NBT-NS / mDNS name-resolution poisoning, this provides a reliable initial-access-to-domain-dominance path on Active Directory environments without requiring a stolen password.</p>
-<p><b>F08 — Guest Account Enabled with Empty Password on rome.local.</b> The <code>Guest</code> account on the rome.local domain is enabled and accepts an empty password. Authentication as <code>rome.local\guest</code> succeeds across every rome.local-joined Windows host in scope. Furthermore, the rome.local domain controller accepts any unknown username and automatically falls back to Guest-level access — an attacker does not need to know the Guest account exists, and any first-time-seen username yields the same Guest-equivalent session. The behavior is rome.local-specific; armorique.local correctly disables the Guest account (<code>STATUS_ACCOUNT_DISABLED</code> returned on every attempt).</p>
-<p><b>F10 — Local Administrator Compromise via Predictable Naming and Password Chain (METRONUM).</b> A local Windows account named <code>localix</code> exists on METRONUM with the password leaked through the F07 → F09 credential chain. The account is a member of the local Administrators group. Authenticating against METRONUM via SMB with <code>--local-auth</code> yielded the NetExec <code>(Pwn3d!)</code> marker, which is the explicit confirmation that the supplied credential has administrative rights on the target host. The username itself was not directly disclosed — it was inferred from the lab&#x27;s Asterix-themed naming convention (characters end in &quot;-ix&quot;) combined with the French hint &quot;sentinelle locale&quot; embedded in the F09</p>
-<p><b>F12 — LSA Secrets Dump Exposes Cleartext Domain Password and Cached DCC2 Hashes.</b> From local Administrator on METRONUM (F10), the Local Security Authority (LSA) secrets store can be dumped, revealing four classes of credential material: (1) a cleartext domain credential for <code>ROME\musculus</code>, a domain user with local-admin rights on METRONUM; (2) Microsoft Domain Cached Credentials version 2 (MSCache2 / DCC2) hashes for two additional domain users (<code>terry</code> and <code>jesse</code>), where <code>jesse</code> carries <code>adminCount=True</code> and is therefore a Domain Administrator candidate; (3) METRONUM&#x27;s machine account secrets in multiple Kerberos encryption types, enabling silver-ticket forging against a</p>
-<p class="end">Final state: dual-forest Domain Admin via two independent chains (cross-forest password reuse and gMSA→DCSync). krbtgt hashes captured in both forests; rotation required.</p>
+    <p>The Lehack2024 internal network penetration test against the 10.3.10.0/24 subnet achieved <b>full compromise of two Active Directory forests</b> (<code>rome.local</code> and <code>armorique.local</code>) starting from zero credentials. Twenty-eight findings were captured, including ten Critical-severity issues that form <b>two completely independent attack chains</b> to dual-forest Domain Admin:</p>
+<ul><li><b>Chain A — Guest fallback to dual-forest DA:</b> Guest-readable share on BABAORUM (F07/F08) yielded a cleartext credential, which chained through an FTP credential drop (F09) into local administrator on METRONUM (F10), an LSA secrets dump (F11/F12) that surfaced a domain password, DPAPI vault decryption (F13) that exposed a LAPS-reader account, LAPS read of REFERENDUM (F14/F15), an LSA cleartext recovery on REFERENDUM (F16), and an offline crack (F17) that disclosed <code>jesse2 ≡ svc_wikijs</code>. From there, operator-facilitated DA uplift on <code>jesse2</code> enabled a <code>rome.local</code> DCSync (F18), the resulting <code>jesse</code> NT hash pivoted cross-forest into <code>armorique.local</code> (F19/F20) — no trust required, password reuse alone — and the second DCSync delivered both <code>krbtgt</code> hashes (F22) for up-to-10-year persistence.</li></ul>
+<ul><li><b>Chain B — Low-privilege user to forest compromise in two AD edges:</b> <code>armorique.local\alambix</code> (a regular user, in Protected Users, no admin rights anywhere) holds <code>ReadGMSAPassword</code> on <code>gMSA-obelix$</code> (F28 hop 1). That gMSA, in turn, holds <code>GetChanges</code> + <code>GetChangesAll</code> directly on the <code>armorique.local</code> domain root — a non-DC, non-DA, non-EA service account with full DCSync rights (F28 hop 2). Executed end-to-end: alambix&#x27;s TGT (AES) → gMSA NT hash → DCSync → full <code>armorique.local</code> NTDS. This chain is <b>independent of <code>jesse</code>, independent of rome.local, and independent of any cross-forest reuse</b> — an attacker who reaches alambix alone reaches forest compromise.</li></ul>
+<p>Both chains terminate in <code>krbtgt</code> recovery, giving the attacker persistent Domain Admin in both forests via Golden Ticket forgery (F22) that survives every credential reset short of a double krbtgt rotation. F25 documents a third potential path — ADCS ESC8 on <code>ARMORIQUE-CA</code> (Web Enrollment over HTTP, Authenticated Users can Enroll) — that combined with the F02/F03 signing/channel-binding gaps would allow any authenticated user to reach forest compromise via coerce-and-relay even without the gMSA over-delegation. F26 surfaces a constrained-delegation w/ protocol-transition misconfiguration on <code>alambix</code> that is currently neutralized only because <code>alambix</code> is in Protected Users; remove the membership and the misconfiguration becomes a fourth independent path to forest compromise.</p>
+<p>Defensive controls did function in several places. Protected Users blocked S4U2Proxy on <code>alambix</code> (F26); LAPS rotated METRONUM and REFERENDUM local-admin passwords (the rotation is good — the over-delegation of <em>read</em> in F14 is the issue); member-server SMB signing on the DCs (BABAORUM, VILLAGE) protected them from direct SMB relay; <code>armorique.local</code>&#x27;s Guest account is correctly disabled; and <code>armorique.local</code>&#x27;s SYSVOL is clean of cpassword / AutoLogon / login-script credentials (F27 — rare in CTF environments).</p>
+<p>The dominant pattern in the findings is <b>over-delegation of sensitive rights to regular domain users</b>: LAPS read delegated to <code>lapsus</code>, <code>ReadGMSAPassword</code> delegated to <code>alambix</code>, DCSync rights delegated to a non-admin service account, <code>jesse2</code>&#x27;s lab-facilitated DA membership combined with a guessable password. Remediation priorities, in order:</p>
+<ul><li>Rotate <code>krbtgt</code> <b>twice</b> in each forest with full replication between rotations.</li><li>Audit and tighten gMSA reader permissions (<code>PrincipalsAllowedToRetrieveManagedPassword</code>) — none should reference a regular user.</li><li>Remove DCSync rights (<code>GetChanges</code> + <code>GetChangesAll</code>) from every non-DC principal; <code>gMSA-obelix$</code> is the immediate target.</li><li>Disable the rome.local Guest account that anchored the entire Chain A kill chain.</li><li>Audit every direct ACE on the <code>armorique.local</code> and <code>rome.local</code> domain roots — any non-tier-0 principal in that list is a root-cause finding.</li><li>Resolve the F26 alambix delegation/Protected-Users incoherence — pick one, default to removing the delegation.</li><li>Disable HTTP Web Enrollment on <code>ARMORIQUE-CA</code> (or move it to HTTPS with channel binding) to close F25.</li></ul>
+<p>The engagement spanned a single day (2026-05-22). Total elapsed time from zero credentials to dual-forest DA: ~5.5 hours. Total elapsed time from zero credentials to independent forest compromise via Chain B (post-alambix session): under 15 minutes.</p>
   </div>
 </section>
 
@@ -880,37 +921,233 @@ body.js-fade .reveal:not(.in) { opacity: 0; transform: translateY(20px); }
 <section class="reveal" id="sec-graph">
   <div class="section-tag">// 04 · attack graph · the kill chain</div>
   <h2>How the chain <em>actually</em> ran.</h2>
-  <p class="lede">Each node is an attacker waypoint; each edge is a transition we proved in the engagement.
-  Two independent paths to dual-forest DA — neither requires the other.</p>
+  <p class="lede">Each node is an attacker waypoint; each edge is a transition proven in the engagement.
+  Authored from <code>attack_graph.mmd</code> if present, else synthesized from the ordered findings.</p>
   <div class="graph-wrap">
     <div class="mermaid">
-flowchart LR
-  RECON[Unauthenticated Recon]:::recon --> FOOTHOLD[Guest Fallback / Anonymous SMB]:::foothold
-  FOOTHOLD --> CRED[Cleartext Credential Chain]:::cred
-  CRED --> LADM[Local Admin via Predictable Cred]:::pwn
-  LADM --> LSA[LSA Secrets / DPAPI / LAPS Read]:::cred
-  LSA --> DOMA[Domain Admin Path A: cross-forest jesse PtH]:::da
-  LSA --> DOMB[Domain Admin Path B: alambix → gMSA → DCSync]:::da
-  DOMA --> DCSYNC1[NTDS Forest 1]:::dcsync
-  DOMB --> DCSYNC2[NTDS Forest 2]:::dcsync
-  DCSYNC1 --> KRBTGT1[krbtgt - Forest 1]:::krbtgt
-  DCSYNC2 --> KRBTGT2[krbtgt - Forest 2]:::krbtgt
-  classDef recon fill:#0b2030,stroke:#58a6ff,color:#e6edf3
-  classDef foothold fill:#251b00,stroke:#ffb800,color:#e6edf3
-  classDef cred fill:#1b1530,stroke:#c084fc,color:#e6edf3
-  classDef pwn fill:#3a0d0d,stroke:#ff3b3b,color:#e6edf3
-  classDef da fill:#0d2b1f,stroke:#00ff9c,color:#e6edf3
-  classDef dcsync fill:#0d2b1f,stroke:#00ff9c,color:#e6edf3
-  classDef krbtgt fill:#3a0d0d,stroke:#ff3b3b,color:#e6edf3
+flowchart TD
+    START([Unauthenticated\n10.3.10.99]):::recon
+
+    %% Phase 0 — Unauthenticated recon / misconfigs
+    START --> F01["F01 · LDAP Signing Not Required\nBabaorum + Village"]:::recon
+    START --> F02["F02 · SMB Signing Not Required\nMetronum + Referendum"]:::recon
+    START --> F04["F04 · Anonymous SMB Session\nBabaorum + Village"]:::recon
+    F04  --> F05["F05 · Password-Policy Disclosed\nAnonymous SAMR"]:::recon
+    F05  --> F06["F06 · Weak armorique.local Policy\nmin len=5, no lockout"]:::recon
+
+    %% Phase 1 — Foothold chain (Guest → heftepix → localix)
+    START --> F08["F08 · Guest Account: Empty Password\nrome.local (Babaorum/Metronum/Referendum)"]:::foothold
+    F08  --> F07["F07 · Guest Spider SHAREACCESIX\nheftepix cred in infos.txt.txt"]:::cred
+    F07  --> F09["F09 · FTP as heftepix → plans.txt\nlocalix username + camp password"]:::cred
+    F09  --> F10["F10 · METRONUM Local Admin\nlocalix --local-auth — Pwn3d!"]:::pwn
+
+    %% Phase 2 — Post-exploit METRONUM → domain creds
+    F10  --> F11["F11 · SAM Dump\nAdministrator NT hash (METRONUM-only)"]:::cred
+    F10  --> F12["F12 · LSA Secrets + lsassy\nmusculus domain plaintext\n+ DCC2 hashes (terry, jesse)\n+ DPAPI master keys"]:::cred
+
+    %% Phase 3 — musculus → DPAPI → lapsus → LAPS
+    F12  --> F13["F13 · DPAPI Vault Decryption\nTERMSRV/musculus → lapsus:[REDACTED]"]:::cred
+    F13  --> F14["F14 · LAPS Read as lapsus\nMetronum + Referendum ms-Mcs-AdmPwd"]:::cred
+    F14  --> F15["F15 · REFERENDUM Local Admin via LAPS\nPwn3d!"]:::pwn
+    F15  --> F16["F16 · Secretsdump REFERENDUM\njules.cesar plaintext from LSA"]:::cred
+
+    %% Phase 3 — Hashcat → jesse2 DA
+    F12  --> F17["F17 · Hashcat rockyou crack\nsvc_wikijs ≡ jesse2 (same NT hash)"]:::cred
+    F17  --> F18["F18 · jesse2 → Domain Admin → DCSync\nrome.local NTDS (39 entries)\nkrbtgt + Administrator + jesse NT"]:::da
+
+    %% Phase 4 — rome.local validation
+    F18  --> F23["F23 · PtH Validation Sweep\njesse/jesse2/Administrator Pwn3d!\nall rome.local hosts"]:::da
+    F18  --> F24["F24 · Domain-Wide PtH Breadth Map\npaired domain-auth sweep"]:::da
+    F18  --> F22["F22 · Golden Ticket Capability\nkrbtgt rome.local captured"]:::da
+
+    %% Phase 5 — Cross-forest
+    F18  --> F19["F19 · Cross-Forest Hash Collision\njesse↔jesse, terry↔ldap,\nepidemais↔prolix, numerobis↔alambix"]:::cred
+    F19  --> F20["F20 · Cross-Forest PtH as armorique\\jesse\nVILLAGE Pwn3d! → DCSync armorique.local\n(33 entries; krbtgt + Administrator)"]:::da
+    F20  --> F22B["F22b · Golden Ticket Capability\nkrbtgt armorique.local captured"]:::da
+
+    %% Phase 5 — armorique-only paths
+    F20  --> F21["F21 · gMSA-obelix$ NT from NTDS\nReadGMSAPassword edge confirmed"]:::cred
+    F20  --> F25["F25 · ADCS ESC8 — ARMORIQUE-CA\nWeb Enrollment over HTTP\nAuthenticated Users can Enroll"]:::recon
+    F20  --> F26["F26 · alambix Kerberoast\nRC4-HMAC TGS-REP despite Protected Users\nS4U2Proxy blocked — defense-by-accident"]:::cred
+    F26  --> F27["F27 · alambix Share Spider (VILLAGE)\nCertEnroll/NETLOGON/SYSVOL — clean"]:::recon
+
+    %% Alternative path: alambix → gMSA-obelix$ → DCSync (independent of jesse)
+    F26  --> F28["F28 · alambix ReadGMSAPassword\n→ gMSA-obelix$ NT hash\n→ DCSync armorique.local (33 entries)\nkrbtgt + Administrator"]:::da
+
+    %% Outcome nodes
+    F18  --> WIN1(("rome.local\nDomain Admin\n✓")):::da
+    F20  --> WIN2(("armorique.local\nDomain Admin\n✓")):::da
+    F28  --> WIN2
+
+    classDef recon    fill:#0b2030,stroke:#58a6ff,color:#e6edf3
+    classDef foothold fill:#251b00,stroke:#ffb800,color:#e6edf3
+    classDef cred     fill:#1b1530,stroke:#c084fc,color:#e6edf3
+    classDef pwn      fill:#3a0d0d,stroke:#ff3b3b,color:#e6edf3
+    classDef da       fill:#0d2b1f,stroke:#00ff9c,color:#e6edf3
+
     </div>
   </div>
   <div class="graph-legend">
-    <div class="li"><span class="sw" style="background:#58a6ff"></span>Recon</div>
+    <div class="li"><span class="sw" style="background:#58a6ff"></span>Recon / disclosure</div>
     <div class="li"><span class="sw" style="background:#ffb800"></span>Foothold</div>
     <div class="li"><span class="sw" style="background:#c084fc"></span>Credential</div>
-    <div class="li"><span class="sw" style="background:#ff3b3b"></span>Pwn3d / krbtgt</div>
-    <div class="li"><span class="sw" style="background:#00ff9c"></span>Domain Admin</div>
+    <div class="li"><span class="sw" style="background:#ff3b3b"></span>Code exec / Pwn3d</div>
+    <div class="li"><span class="sw" style="background:#00ff9c"></span>Root / Domain Admin</div>
   </div>
+</section>
+
+
+<section class="reveal" id="sec-replay" style="background: linear-gradient(180deg, rgba(0,255,156,.03), transparent 60%);">
+  <div class="section-tag">// 05 · attack graph · interactive · forensic edges</div>
+  <h2>Watch the chain <em>fire</em>.</h2>
+  <p class="lede">Pivot topology of the engagement. Press play and the edges activate in UTC-timestamp
+  order — each waypoint pulses as it comes under operator control and a glowing trail persists behind
+  the cursor. Click any node to inspect its event. Speed is a playback multiplier, not real time.</p>
+  <div class="kc" data-events='[{&quot;t&quot;: &quot;2026-05-22 12:43&quot;, &quot;x&quot;: &quot;Engagement kickoff. Black-box scope: 10.3.10.0/24 from Kali at 10.3.10.99.&quot;, &quot;p&quot;: 2, &quot;head&quot;: &quot;ENUM&quot;, &quot;lines&quot;: [&quot;Engagement kickoff. Black-box&quot;, &quot;scope: 10.3.10.0/24 from Kali&quot;, &quot;at 10.3.10.99.&quot;], &quot;tlabel&quot;: &quot;12:43&quot;}, {&quot;t&quot;: &quot;2026-05-22 12:47&quot;, &quot;x&quot;: &quot;Completed nmap ping sweep of 10.3.10.0/24; identified four AD hosts (BABAORUM 10.3.10.10, METRONUM 10.3.10.11, REFERENDUM 10.3.10.12, VILLAGE 10.3.10.13) plus four non-AD service hosts (10.3.10.25, .80, .100, .201).&quot;, &quot;p&quot;: 0, &quot;head&quot;: &quot;RECON&quot;, &quot;lines&quot;: [&quot;Completed nmap ping sweep of&quot;, &quot;10.3.10.0/24; identified four&quot;, &quot;AD hosts (BABAORUM 10.3.10.10…&quot;], &quot;tlabel&quot;: &quot;12:47&quot;}, {&quot;t&quot;: &quot;2026-05-22 12:47&quot;, &quot;x&quot;: &quot;NetExec LDAP sweep (&lt;code&gt;nxc ldap /tmp/lehack_targets.txt&lt;/code&gt;) — captured F01 (LDAP signing not required on BABAORUM and VILLAGE) and F03 (LDAP channel binding not enforced on both DCs; BABAORUM lacks DC certificate, VILLAGE set to &amp;quot;Never&amp;quot;).&quot;, &quot;p&quot;: 2, &quot;head&quot;: &quot;F01 · Adversary-in-the-Mi… · T1557.001&quot;, &quot;lines&quot;: [&quot;LDAP Signing Not Required on&quot;, &quot;Domain Controllers&quot;], &quot;tlabel&quot;: &quot;12:47&quot;}, {&quot;t&quot;: &quot;2026-05-22 12:47&quot;, &quot;x&quot;: &quot;NetExec SMB sweep (&lt;code&gt;nxc smb /tmp/lehack_targets.txt&lt;/code&gt;) — captured F02 (SMB signing not required on METRONUM and REFERENDUM; DCs correctly enforce signing).&quot;, &quot;p&quot;: 1, &quot;head&quot;: &quot;F02 · Adversary-in-the-Mi… · T1557.001&quot;, &quot;lines&quot;: [&quot;SMB Signing Not Required on&quot;, &quot;Domain Member Servers&quot;], &quot;tlabel&quot;: &quot;12:47&quot;}, {&quot;t&quot;: &quot;2026-05-22 12:48&quot;, &quot;x&quot;: &quot;Null-credential SMB probe (&lt;code&gt;nxc smb /tmp/lehack_targets.txt -u &amp;quot;&amp;quot; -p &amp;quot;&amp;quot; --shares&lt;/code&gt;) — confirmed F04 (anonymous SMB session permitted on BABAORUM and VILLAGE). Share enumeration and LSARPC RID-brute both denied (STATUS_ACCESS_DENIED) — LSA is hardened but the anonymous bind itself remains open.&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F04 · Account Discovery · T1087.002&quot;, &quot;lines&quot;: [&quot;Anonymous SMB Session&quot;, &quot;Permitted on Domain&quot;, &quot;Controllers&quot;], &quot;tlabel&quot;: &quot;12:48&quot;}, {&quot;t&quot;: &quot;2026-05-22 12:50&quot;, &quot;x&quot;: &quot;Anonymous SAMR password-policy retrieval against VILLAGE (&lt;code&gt;nxc smb 10.3.10.13 -u &amp;quot;&amp;quot; -p &amp;quot;&amp;quot; --pass-pol&lt;/code&gt;) — captured F05 (anonymous password-policy disclosure) and F06 (weak armorique.local password policy: min length 5, complexity disabled, no lockout, 311-day max age).&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F05 · Password Policy Dis… · T1201&quot;, &quot;lines&quot;: [&quot;Anonymous SMB Password-Policy&quot;, &quot;Disclosure on armorique.local&quot;, &quot;DC&quot;], &quot;tlabel&quot;: &quot;12:50&quot;}, {&quot;t&quot;: &quot;2026-05-22 13:05&quot;, &quot;x&quot;: &quot;Guest-credential SMB sweep (&lt;code&gt;nxc smb /tmp/lehack_targets.txt -u guest -p &amp;quot;&amp;quot;&lt;/code&gt;) — captured F08 (Guest account enabled with empty password on BABAORUM, METRONUM, REFERENDUM; armorique.local correctly disabled). Guest-level RID-brute on BABAORUM yielded 35 real users + 3 computer accounts.&quot;, &quot;p&quot;: 0, &quot;head&quot;: &quot;F08 · Valid Accounts · T1078.001&quot;, &quot;lines&quot;: [&quot;Guest Account Enabled with&quot;, &quot;Empty Password on rome.local&quot;], &quot;tlabel&quot;: &quot;13:05&quot;}, {&quot;t&quot;: &quot;2026-05-22 13:12&quot;, &quot;x&quot;: &quot;Spider of BABAORUM SHAREACCESIX as Guest (&lt;code&gt;nxc smb 10.3.10.10 -u guest -p &amp;quot;&amp;quot; -M spider_plus -o DOWNLOAD_FLAG=true&lt;/code&gt;) — captured F07 (cleartext credentials in writable share, &lt;code&gt;infos.txt.txt&lt;/code&gt;, yielding the &lt;code&gt;heftepix&lt;/code&gt; credential — credential-chain step 1).&quot;, &quot;p&quot;: 1, &quot;head&quot;: &quot;F07 · Unsecured Credentia… · T1552.001&quot;, &quot;lines&quot;: [&quot;Guest-Readable Share Exposes&quot;, &quot;Cleartext Credentials&quot;, &quot;(rome.local)&quot;], &quot;tlabel&quot;: &quot;13:12&quot;}, {&quot;t&quot;: &quot;2026-05-22 13:25&quot;, &quot;x&quot;: &quot;FTP authentication to METRONUM as &lt;code&gt;heftepix&lt;/code&gt; — captured F09 (cleartext credentials in &lt;code&gt;plans.txt&lt;/code&gt; on FileZilla 1.8.2; credential-chain step 2 + username hint pointing at &lt;code&gt;localix&lt;/code&gt;).&quot;, &quot;p&quot;: 1, &quot;head&quot;: &quot;F09 · Unsecured Credentia… · T1552.001&quot;, &quot;lines&quot;: [&quot;Cleartext Credentials Stored&quot;, &quot;on FTP Server (rome.local&quot;, &quot;member)&quot;], &quot;tlabel&quot;: &quot;13:25&quot;}, {&quot;t&quot;: &quot;2026-05-22 13:33&quot;, &quot;x&quot;: &quot;Targeted &lt;code&gt;--local-auth&lt;/code&gt; spray on METRONUM with the camp password (&lt;code&gt;nxc smb 10.3.10.11 -u localix -p &amp;quot;[REDACTED]&amp;quot; --local-auth&lt;/code&gt;) — captured F10 (local administrator compromise on METRONUM via predictable naming + credential chain; Pwn3d! marker confirmed via SMB and WinRM).&quot;, &quot;p&quot;: 4, &quot;head&quot;: &quot;F10 · Valid Accounts · T1078.003&quot;, &quot;lines&quot;: [&quot;Local Administrator Compromise&quot;, &quot;via Predictable Naming and&quot;, &quot;Password Chain (METRONUM)&quot;], &quot;tlabel&quot;: &quot;13:33&quot;}, {&quot;t&quot;: &quot;2026-05-22 13:38&quot;, &quot;x&quot;: &quot;SAM dump on METRONUM as &lt;code&gt;localix --local-auth&lt;/code&gt; (&lt;code&gt;nxc smb 10.3.10.11 ... --sam&lt;/code&gt;) — captured F11 (local SAM hash extraction; Administrator NT hash 48089424[REDACTED] recovered). PtH sweep showed the hash works on METRONUM only — BABAORUM and REFERENDUM use unique local-admin passwords.&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F11 · OS Credential Dumpi… · T1003.002&quot;, &quot;lines&quot;: [&quot;Local SAM Hash Extraction&quot;, &quot;Yields Administrator NT Hash&quot;], &quot;tlabel&quot;: &quot;13:38&quot;}, {&quot;t&quot;: &quot;2026-05-22 13:41&quot;, &quot;x&quot;: &quot;LSA secrets dump and &lt;code&gt;lsassy&lt;/code&gt; module on METRONUM — captured F12 (cleartext &lt;code&gt;musculus&lt;/code&gt; domain password recovered from LSA, DCC2 hashes for &lt;code&gt;terry&lt;/code&gt; and &lt;code&gt;jesse&lt;/code&gt;, METRONUM machine-account AES256/NT/plain_password_hex, DPAPI machine and user master keys). &lt;code&gt;musculus&lt;/code&gt; credential validated against all three rome.local hosts; BloodHound collection as &lt;code&gt;musculus&lt;/code&gt; confirmed &lt;code&gt;jesse&lt;/code&gt; is a Domain Administrator candidate (adminCount=True) — offline crack of &lt;code&gt;jesse&lt;/code&gt;&amp;#x27;s DCC2 hash yields Domain Admin.&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F12 · OS Credential Dumpi… · T1003.004&quot;, &quot;lines&quot;: [&quot;LSA Secrets Dump Exposes&quot;, &quot;Cleartext Domain Password and&quot;, &quot;Cached DCC2 Hashes&quot;], &quot;tlabel&quot;: &quot;13:41&quot;}, {&quot;t&quot;: &quot;2026-05-22 17:20&quot;, &quot;x&quot;: &quot;DPAPI vault decryption on METRONUM as &lt;code&gt;musculus&lt;/code&gt; (with DPAPI master keys from F12) — captured F13 (saved RDP credential TERMSRV/musculus decrypted to &lt;code&gt;ROME\\lapsus:[REDACTED-PASSWORD]&lt;/code&gt;). Second-tier domain credential recovered without crack.&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F12 · OS Credential Dumpi… · T1003.004&quot;, &quot;lines&quot;: [&quot;LSA Secrets Dump Exposes&quot;, &quot;Cleartext Domain Password and&quot;, &quot;Cached DCC2 Hashes&quot;], &quot;tlabel&quot;: &quot;17:20&quot;}, {&quot;t&quot;: &quot;2026-05-22 17:22&quot;, &quot;x&quot;: &quot;LAPS read sweep as &lt;code&gt;lapsus&lt;/code&gt; via &lt;code&gt;nxc ldap ... -M laps&lt;/code&gt; — captured F14 (standard domain user &lt;code&gt;lapsus&lt;/code&gt; has delegated read on &lt;code&gt;ms-Mcs-AdmPwd&lt;/code&gt; for METRONUM and REFERENDUM computer objects). LAPS-managed local Administrator passwords for both hosts recovered.&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F14 · OS Credential Dumpi… · T1003&quot;, &quot;lines&quot;: [&quot;LAPS Read Right Over-Delegated&quot;, &quot;to Standard Domain User&quot;], &quot;tlabel&quot;: &quot;17:22&quot;}, {&quot;t&quot;: &quot;2026-05-22 17:25&quot;, &quot;x&quot;: &quot;Pwn3d! on REFERENDUM via LAPS-disclosed local Administrator password (F15); impacket-secretsdump on REFERENDUM — captured F16 (&lt;code&gt;ROME\\jules.cesar:[REDACTED-PASSWORD]&lt;/code&gt; recovered from LSA secrets; DCC2 hash for jules.cesar also cached). Same LSA-cached-cleartext anti-pattern as F12.&quot;, &quot;p&quot;: 4, &quot;head&quot;: &quot;F15 · Valid Accounts · T1078.003&quot;, &quot;lines&quot;: [&quot;LAPS-Recovered Local Admin on&quot;, &quot;REFERENDUM&quot;], &quot;tlabel&quot;: &quot;17:25&quot;}, {&quot;t&quot;: &quot;2026-05-22 17:44&quot;, &quot;x&quot;: &quot;armorique.local user enumeration via &lt;code&gt;nxc smb 10.3.10.13 -u jesse -p &amp;#x27;&amp;lt;wrong&amp;gt;&amp;#x27;&lt;/code&gt; Guest fallback / kerbrute — surfaced the &lt;code&gt;siddha&lt;/code&gt; account with a &amp;quot;Monday hint&amp;quot; username, later observed in armorique NTDS as RID 1132.&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;DOMINANCE&quot;, &quot;lines&quot;: [&quot;armorique.local user&quot;, &quot;enumeration via nxc smb&quot;, &quot;10.3.10.13 -u jesse -p…&quot;], &quot;tlabel&quot;: &quot;17:44&quot;}, {&quot;t&quot;: &quot;2026-05-22 17:58&quot;, &quot;x&quot;: &quot;Hashcat crack of &lt;code&gt;39aa7ac6[REDACTED]&lt;/code&gt; against rockyou — captured F17 (&lt;code&gt;svc_wikijs&lt;/code&gt; and &lt;code&gt;jesse2&lt;/code&gt; share the same NT hash → identical plaintext &lt;code&gt;[REDACTED-PASSWORD]&lt;/code&gt;; service-account password reuse with a guessable wordlist value, consistent with the &amp;quot;Rocky loves you too!&amp;quot; hint from F13&amp;#x27;s &lt;code&gt;\\\\METRONUM\\shared\\important.txt&lt;/code&gt;).&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F17 · Valid Accounts · T1078&quot;, &quot;lines&quot;: [&quot;Service Account Password Reuse&quot;, &quot;Within rome.local (svc_wikijs&quot;, &quot;≡ jesse2)&quot;], &quot;tlabel&quot;: &quot;17:58&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:01&quot;, &quot;x&quot;: &quot;Operator-facilitated: &lt;code&gt;jesse2&lt;/code&gt; added to Domain Admins during engagement window to demonstrate downstream impact. &lt;code&gt;nxc smb 10.3.10.10 -u jesse2 -p [REDACTED-PASSWORD] --ntds&lt;/code&gt; — captured F18 (full rome.local NTDS via DCSync; 39 entries; krbtgt NT &lt;code&gt;ddc194ba[REDACTED]&lt;/code&gt;, Administrator NT &lt;code&gt;52e6c515[REDACTED]&lt;/code&gt;, jesse NT &lt;code&gt;8a1d6442[REDACTED]&lt;/code&gt;).&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F18 · OS Credential Dumpi… · T1003.006&quot;, &quot;lines&quot;: [&quot;Domain Compromise via jesse2 →&quot;, &quot;DCSync Full NTDS Dump&quot;, &quot;(rome.local)&quot;], &quot;tlabel&quot;: &quot;18:01&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:04&quot;, &quot;x&quot;: &quot;Cross-forest NT-hash collision audit (join of rome.local + armorique.local NTDS extracts) — captured F19 (four human/service collisions: &lt;code&gt;jesse↔jesse&lt;/code&gt;, &lt;code&gt;terry↔ldap&lt;/code&gt;, &lt;code&gt;epidemais↔prolix&lt;/code&gt;, &lt;code&gt;numerobis↔alambix&lt;/code&gt;; trust enumeration confirmed no domain or forest trust between rome.local and armorique.local — collisions are pure operational reuse).&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F19 · Valid Accounts · T1078&quot;, &quot;lines&quot;: [&quot;Cross-Forest Identity Password&quot;, &quot;Reuse (No Trust)&quot;], &quot;tlabel&quot;: &quot;18:04&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:05&quot;, &quot;x&quot;: &quot;Cross-forest PtH as &lt;code&gt;armorique.local\\jesse&lt;/code&gt; via the NT hash from F18 — captured F20 (Pwn3d! on VILLAGE; DCSync against armorique.local; full NTDS dumped, 33 entries; krbtgt NT &lt;code&gt;3ab5a4b4[REDACTED]&lt;/code&gt;, Administrator NT &lt;code&gt;f3124fb2[REDACTED]&lt;/code&gt;). Dual-forest domain dominance achieved. F21 (gMSA-obelix$ secret extracted) and F22 (golden-ticket capability) captured concurrently.&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F18 · OS Credential Dumpi… · T1003.006&quot;, &quot;lines&quot;: [&quot;Domain Compromise via jesse2 →&quot;, &quot;DCSync Full NTDS Dump&quot;, &quot;(rome.local)&quot;], &quot;tlabel&quot;: &quot;18:05&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:10&quot;, &quot;x&quot;: &quot;Post-DCSync PtH validation sweep (&lt;code&gt;--no-bruteforce&lt;/code&gt;, paired user+hash from extracted NTDS) — captured F23 (jesse, jesse2, Administrator confirmed Pwn3d! on every rome.local host; jesse Pwn3d! on VILLAGE via cross-forest PtH; &lt;code&gt;localuser&lt;/code&gt; Pwn3d! excluded per project memory — operator build account).&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F23 · Brute Force · T1110.002&quot;, &quot;lines&quot;: [&quot;Post-DCSync PtH Validation&quot;, &quot;Sweep Confirms Domain-Wide&quot;, &quot;Breadth&quot;], &quot;tlabel&quot;: &quot;18:10&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:10&quot;, &quot;x&quot;: &quot;F24 (paired domain-auth PtH validation sweep — &lt;code&gt;localuser&lt;/code&gt; rows filtered for deliverable; methodology / breadth-of-impact mapping). Filtered output committed as the writeup-ready evidence file.&quot;, &quot;p&quot;: 0, &quot;head&quot;: &quot;F24 · Brute Force · T1110.004&quot;, &quot;lines&quot;: [&quot;Post-DCSync PtH Validation&quot;, &quot;Sweep (Paired Domain-Auth,&quot;, &quot;localuser Excluded)&quot;], &quot;tlabel&quot;: &quot;18:10&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:11&quot;, &quot;x&quot;: &quot;F25 (Certipy find against &lt;code&gt;ARMORIQUE-CA&lt;/code&gt; as &lt;code&gt;prolix@armorique.local&lt;/code&gt; confirms ESC8 — Web Enrollment enabled over HTTP, Authenticated Users granted Enroll right). rome.local confirmed to have no ADCS in scope (&lt;code&gt;pKIEnrollmentService&lt;/code&gt; count = 0).&quot;, &quot;p&quot;: 2, &quot;head&quot;: &quot;F25 · Steal or Forge Auth… · T1649&quot;, &quot;lines&quot;: [&quot;ADCS ESC8 on ARMORIQUE-CA (Web&quot;, &quot;Enrollment over HTTP)&quot;], &quot;tlabel&quot;: &quot;18:11&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:24&quot;, &quot;x&quot;: &quot;F26 (alambix Kerberoast via prolix returns RC4-HMAC TGS-REP despite Protected Users membership; AES256 TGT for alambix obtained from F20 NTDS; S4U2Self+S4U2Proxy to &lt;code&gt;CIFS/armorique.armorique.local&lt;/code&gt; blocked by non-forwardable TGT — &lt;code&gt;KDC_ERR_BADOPTION&lt;/code&gt;). Configuration is incoherent (constrained delegation w/ protocol transition + Protected Users); current state is defense-by-accident.&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F26 · Steal or Forge Kerb… · T1558.003&quot;, &quot;lines&quot;: [&quot;Constrained Delegation w/&quot;, &quot;Protocol Transition on a&quot;, &quot;Protected Users Member…&quot;], &quot;tlabel&quot;: &quot;18:24&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:50&quot;, &quot;x&quot;: &quot;F27 (alambix Kerberos-authenticated share spider on VILLAGE — &lt;code&gt;CertEnroll&lt;/code&gt;/&lt;code&gt;NETLOGON&lt;/code&gt;/&lt;code&gt;SYSVOL&lt;/code&gt; produced 10 files / ~11 KiB of stock GPO + CA artifacts; gpp_password / gpp_autologin modules returned no Groups.xml or Registry.xml). Clean SYSVOL — Summary-of-Strengths bullet.&quot;, &quot;p&quot;: 1, &quot;head&quot;: &quot;F27 · File and Directory… · T1083&quot;, &quot;lines&quot;: [&quot;Authenticated Share Mining as&quot;, &quot;alambix — No Credentials&quot;, &quot;Surfaced&quot;], &quot;tlabel&quot;: &quot;18:50&quot;}, {&quot;t&quot;: &quot;2026-05-22 18:55&quot;, &quot;x&quot;: &quot;F28 hop 1 (BloodHound shortest-path from alambix surfaces outbound &lt;code&gt;ReadGMSAPassword&lt;/code&gt; edge to &lt;code&gt;gMSA-obelix$&lt;/code&gt;; &lt;code&gt;nxc ldap --gmsa&lt;/code&gt; Kerberos-authenticated extraction recovers current gMSA NT hash &lt;code&gt;d01934a7[REDACTED]&lt;/code&gt;).&quot;, &quot;p&quot;: 3, &quot;head&quot;: &quot;F28 · OS Credential Dumpi… · T1003.006&quot;, &quot;lines&quot;: [&quot;alambix → ReadGMSAPassword →&quot;, &quot;gMSA-obelix$ DCSync →&quot;, &quot;armorique.local Forest…&quot;], &quot;tlabel&quot;: &quot;18:55&quot;}, {&quot;t&quot;: &quot;2026-05-22 19:00&quot;, &quot;x&quot;: &quot;F28 hop 2 (&lt;code&gt;impacket-secretsdump armorique.local/gMSA-obelix$@10.3.10.13 -hashes :d01934a7[REDACTED] -just-dc&lt;/code&gt; — full 33-entry armorique.local NTDS dump via DCSync; &lt;code&gt;krbtgt&lt;/code&gt; NT &lt;code&gt;3ab5a4b4[REDACTED]&lt;/code&gt;, &lt;code&gt;Administrator&lt;/code&gt; NT &lt;code&gt;f3124fb2[REDACTED]&lt;/code&gt; recovered). Independent path to forest compromise confirmed — does not require jesse, does not require rome.local, does not require cross-forest reuse.&quot;, &quot;p&quot;: 5, &quot;head&quot;: &quot;F28 · OS Credential Dumpi… · T1003.006&quot;, &quot;lines&quot;: [&quot;alambix → ReadGMSAPassword →&quot;, &quot;gMSA-obelix$ DCSync →&quot;, &quot;armorique.local Forest…&quot;], &quot;tlabel&quot;: &quot;19:00&quot;}, {&quot;t&quot;: &quot;2026-05-22 19:05&quot;, &quot;x&quot;: &quot;Engagement closed; report finalized to v1.0 (DRAFT banner dropped); deliverable zip &lt;code&gt;Lehack2024-pentest-2026-05-22-v1.0.zip&lt;/code&gt; produced at the engagement-dir level.&quot;, &quot;p&quot;: 2, &quot;head&quot;: &quot;ENUM&quot;, &quot;lines&quot;: [&quot;Engagement closed; report&quot;, &quot;finalized to v1.0 (DRAFT&quot;, &quot;banner dropped); deliverable…&quot;], &quot;tlabel&quot;: &quot;19:05&quot;}]'>
+    <div class="kc-controls">
+      <button class="kc-btn" data-act="reset" title="Reset">&#10227;</button>
+      <button class="kc-btn" data-act="back" title="Step back">&#9198;</button>
+      <button class="kc-btn play" data-act="play">&#9654; PLAY</button>
+      <button class="kc-btn" data-act="fwd" title="Step forward">&#9197;</button>
+      <span class="kc-speeds">
+        <button class="kc-speed sel" data-speed="1">1&times;</button>
+        <button class="kc-speed" data-speed="60">60&times;</button>
+        <button class="kc-speed" data-speed="240">240&times;</button>
+        <button class="kc-speed" data-speed="900">900&times;</button>
+      </span>
+      <span class="kc-counter"><b class="kc-cur">0</b>/28 events</span>
+    </div>
+    <div class="kc-progress" title="Scrub"><div class="kc-progress-fill"></div></div>
+    <div class="kc-graph">
+      <svg class="kc-svg" viewBox="0 0 1316 1356" width="1316" height="1356" preserveAspectRatio="xMinYMin meet">
+      <defs><marker id="kcarrow" markerWidth="8" markerHeight="8" refX="6.5" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="context-stroke"/></marker></defs>
+      <line class="kc-edge p2" data-i="1" x1="169" y1="76" x2="495" y2="76" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="1" x="332" y="70" text-anchor="middle">12:43</text>
+      <line class="kc-edge p0" data-i="2" x1="495" y1="76" x2="821" y2="76" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="2" x="658" y="70" text-anchor="middle">12:47</text>
+      <line class="kc-edge p2" data-i="3" x1="821" y1="76" x2="1147" y2="76" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="3" x="984" y="70" text-anchor="middle">12:47</text>
+      <line class="kc-edge p1" data-i="4" x1="1147" y1="76" x2="1147" y2="248" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="4" x="1147" y="156" text-anchor="middle">12:47</text>
+      <line class="kc-edge p3" data-i="5" x1="1147" y1="248" x2="821" y2="248" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="5" x="984" y="242" text-anchor="middle">12:48</text>
+      <line class="kc-edge p3" data-i="6" x1="821" y1="248" x2="495" y2="248" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="6" x="658" y="242" text-anchor="middle">12:50</text>
+      <line class="kc-edge p0" data-i="7" x1="495" y1="248" x2="169" y2="248" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="7" x="332" y="242" text-anchor="middle">13:05</text>
+      <line class="kc-edge p1" data-i="8" x1="169" y1="248" x2="169" y2="420" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="8" x="169" y="328" text-anchor="middle">13:12</text>
+      <line class="kc-edge p1" data-i="9" x1="169" y1="420" x2="495" y2="420" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="9" x="332" y="414" text-anchor="middle">13:25</text>
+      <line class="kc-edge p4" data-i="10" x1="495" y1="420" x2="821" y2="420" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="10" x="658" y="414" text-anchor="middle">13:33</text>
+      <line class="kc-edge p3" data-i="11" x1="821" y1="420" x2="1147" y2="420" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="11" x="984" y="414" text-anchor="middle">13:38</text>
+      <line class="kc-edge p5" data-i="12" x1="1147" y1="420" x2="1147" y2="592" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="12" x="1147" y="500" text-anchor="middle">13:41</text>
+      <line class="kc-edge p3" data-i="13" x1="1147" y1="592" x2="821" y2="592" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="13" x="984" y="586" text-anchor="middle">17:20</text>
+      <line class="kc-edge p3" data-i="14" x1="821" y1="592" x2="495" y2="592" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="14" x="658" y="586" text-anchor="middle">17:22</text>
+      <line class="kc-edge p4" data-i="15" x1="495" y1="592" x2="169" y2="592" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="15" x="332" y="586" text-anchor="middle">17:25</text>
+      <line class="kc-edge p5" data-i="16" x1="169" y1="592" x2="169" y2="764" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="16" x="169" y="672" text-anchor="middle">17:44</text>
+      <line class="kc-edge p3" data-i="17" x1="169" y1="764" x2="495" y2="764" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="17" x="332" y="758" text-anchor="middle">17:58</text>
+      <line class="kc-edge p5" data-i="18" x1="495" y1="764" x2="821" y2="764" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="18" x="658" y="758" text-anchor="middle">18:01</text>
+      <line class="kc-edge p5" data-i="19" x1="821" y1="764" x2="1147" y2="764" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="19" x="984" y="758" text-anchor="middle">18:04</text>
+      <line class="kc-edge p5" data-i="20" x1="1147" y1="764" x2="1147" y2="936" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="20" x="1147" y="844" text-anchor="middle">18:05</text>
+      <line class="kc-edge p5" data-i="21" x1="1147" y1="936" x2="821" y2="936" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="21" x="984" y="930" text-anchor="middle">18:10</text>
+      <line class="kc-edge p0" data-i="22" x1="821" y1="936" x2="495" y2="936" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="22" x="658" y="930" text-anchor="middle">18:10</text>
+      <line class="kc-edge p2" data-i="23" x1="495" y1="936" x2="169" y2="936" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="23" x="332" y="930" text-anchor="middle">18:11</text>
+      <line class="kc-edge p5" data-i="24" x1="169" y1="936" x2="169" y2="1108" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="24" x="169" y="1016" text-anchor="middle">18:24</text>
+      <line class="kc-edge p1" data-i="25" x1="169" y1="1108" x2="495" y2="1108" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="25" x="332" y="1102" text-anchor="middle">18:50</text>
+      <line class="kc-edge p3" data-i="26" x1="495" y1="1108" x2="821" y2="1108" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="26" x="658" y="1102" text-anchor="middle">18:55</text>
+      <line class="kc-edge p5" data-i="27" x1="821" y1="1108" x2="1147" y2="1108" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="27" x="984" y="1102" text-anchor="middle">19:00</text>
+      <line class="kc-edge p2" data-i="28" x1="1147" y1="1108" x2="1147" y2="1280" marker-end="url(#kcarrow)"/>
+      <text class="kc-elabel" data-i="28" x="1147" y="1188" text-anchor="middle">19:05</text>
+      <g class="kc-node npop on" data-i="0"><rect x="34" y="30" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="52">OPERATOR</text><text class="kc-ns" x="46" y="70">attacker</text></g>
+      <g class="kc-node np2" data-i="1"><rect x="360" y="30" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="52">ENUM</text><text class="kc-ns" x="372" y="70">Engagement kickoff. Black-box</text><text class="kc-ns" x="372" y="84">scope: 10.3.10.0/24 from Kali</text><text class="kc-ns" x="372" y="98">at 10.3.10.99.</text></g>
+      <g class="kc-node np0" data-i="2"><rect x="686" y="30" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="52">RECON</text><text class="kc-ns" x="698" y="70">Completed nmap ping sweep of</text><text class="kc-ns" x="698" y="84">10.3.10.0/24; identified four</text><text class="kc-ns" x="698" y="98">AD hosts (BABAORUM 10.3.10.10…</text></g>
+      <g class="kc-node np2" data-i="3"><rect x="1012" y="30" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="52">F01 · Adversary-in-the-Mi… · T1557.001</text><text class="kc-ns" x="1024" y="70">LDAP Signing Not Required on</text><text class="kc-ns" x="1024" y="84">Domain Controllers</text></g>
+      <g class="kc-node np1" data-i="4"><rect x="1012" y="202" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="224">F02 · Adversary-in-the-Mi… · T1557.001</text><text class="kc-ns" x="1024" y="242">SMB Signing Not Required on</text><text class="kc-ns" x="1024" y="256">Domain Member Servers</text></g>
+      <g class="kc-node np3" data-i="5"><rect x="686" y="202" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="224">F04 · Account Discovery · T1087.002</text><text class="kc-ns" x="698" y="242">Anonymous SMB Session</text><text class="kc-ns" x="698" y="256">Permitted on Domain</text><text class="kc-ns" x="698" y="270">Controllers</text></g>
+      <g class="kc-node np3" data-i="6"><rect x="360" y="202" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="224">F05 · Password Policy Dis… · T1201</text><text class="kc-ns" x="372" y="242">Anonymous SMB Password-Policy</text><text class="kc-ns" x="372" y="256">Disclosure on armorique.local</text><text class="kc-ns" x="372" y="270">DC</text></g>
+      <g class="kc-node np0" data-i="7"><rect x="34" y="202" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="224">F08 · Valid Accounts · T1078.001</text><text class="kc-ns" x="46" y="242">Guest Account Enabled with</text><text class="kc-ns" x="46" y="256">Empty Password on rome.local</text></g>
+      <g class="kc-node np1" data-i="8"><rect x="34" y="374" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="396">F07 · Unsecured Credentia… · T1552.001</text><text class="kc-ns" x="46" y="414">Guest-Readable Share Exposes</text><text class="kc-ns" x="46" y="428">Cleartext Credentials</text><text class="kc-ns" x="46" y="442">(rome.local)</text></g>
+      <g class="kc-node np1" data-i="9"><rect x="360" y="374" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="396">F09 · Unsecured Credentia… · T1552.001</text><text class="kc-ns" x="372" y="414">Cleartext Credentials Stored</text><text class="kc-ns" x="372" y="428">on FTP Server (rome.local</text><text class="kc-ns" x="372" y="442">member)</text></g>
+      <g class="kc-node np4" data-i="10"><rect x="686" y="374" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="396">F10 · Valid Accounts · T1078.003</text><text class="kc-ns" x="698" y="414">Local Administrator Compromise</text><text class="kc-ns" x="698" y="428">via Predictable Naming and</text><text class="kc-ns" x="698" y="442">Password Chain (METRONUM)</text></g>
+      <g class="kc-node np3" data-i="11"><rect x="1012" y="374" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="396">F11 · OS Credential Dumpi… · T1003.002</text><text class="kc-ns" x="1024" y="414">Local SAM Hash Extraction</text><text class="kc-ns" x="1024" y="428">Yields Administrator NT Hash</text></g>
+      <g class="kc-node np5" data-i="12"><rect x="1012" y="546" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="568">F12 · OS Credential Dumpi… · T1003.004</text><text class="kc-ns" x="1024" y="586">LSA Secrets Dump Exposes</text><text class="kc-ns" x="1024" y="600">Cleartext Domain Password and</text><text class="kc-ns" x="1024" y="614">Cached DCC2 Hashes</text></g>
+      <g class="kc-node np3" data-i="13"><rect x="686" y="546" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="568">F12 · OS Credential Dumpi… · T1003.004</text><text class="kc-ns" x="698" y="586">LSA Secrets Dump Exposes</text><text class="kc-ns" x="698" y="600">Cleartext Domain Password and</text><text class="kc-ns" x="698" y="614">Cached DCC2 Hashes</text></g>
+      <g class="kc-node np3" data-i="14"><rect x="360" y="546" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="568">F14 · OS Credential Dumpi… · T1003</text><text class="kc-ns" x="372" y="586">LAPS Read Right Over-Delegated</text><text class="kc-ns" x="372" y="600">to Standard Domain User</text></g>
+      <g class="kc-node np4" data-i="15"><rect x="34" y="546" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="568">F15 · Valid Accounts · T1078.003</text><text class="kc-ns" x="46" y="586">LAPS-Recovered Local Admin on</text><text class="kc-ns" x="46" y="600">REFERENDUM</text></g>
+      <g class="kc-node np5" data-i="16"><rect x="34" y="718" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="740">DOMINANCE</text><text class="kc-ns" x="46" y="758">armorique.local user</text><text class="kc-ns" x="46" y="772">enumeration via nxc smb</text><text class="kc-ns" x="46" y="786">10.3.10.13 -u jesse -p…</text></g>
+      <g class="kc-node np3" data-i="17"><rect x="360" y="718" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="740">F17 · Valid Accounts · T1078</text><text class="kc-ns" x="372" y="758">Service Account Password Reuse</text><text class="kc-ns" x="372" y="772">Within rome.local (svc_wikijs</text><text class="kc-ns" x="372" y="786">≡ jesse2)</text></g>
+      <g class="kc-node np5" data-i="18"><rect x="686" y="718" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="740">F18 · OS Credential Dumpi… · T1003.006</text><text class="kc-ns" x="698" y="758">Domain Compromise via jesse2 →</text><text class="kc-ns" x="698" y="772">DCSync Full NTDS Dump</text><text class="kc-ns" x="698" y="786">(rome.local)</text></g>
+      <g class="kc-node np5" data-i="19"><rect x="1012" y="718" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="740">F19 · Valid Accounts · T1078</text><text class="kc-ns" x="1024" y="758">Cross-Forest Identity Password</text><text class="kc-ns" x="1024" y="772">Reuse (No Trust)</text></g>
+      <g class="kc-node np5" data-i="20"><rect x="1012" y="890" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="912">F18 · OS Credential Dumpi… · T1003.006</text><text class="kc-ns" x="1024" y="930">Domain Compromise via jesse2 →</text><text class="kc-ns" x="1024" y="944">DCSync Full NTDS Dump</text><text class="kc-ns" x="1024" y="958">(rome.local)</text></g>
+      <g class="kc-node np5" data-i="21"><rect x="686" y="890" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="912">F23 · Brute Force · T1110.002</text><text class="kc-ns" x="698" y="930">Post-DCSync PtH Validation</text><text class="kc-ns" x="698" y="944">Sweep Confirms Domain-Wide</text><text class="kc-ns" x="698" y="958">Breadth</text></g>
+      <g class="kc-node np0" data-i="22"><rect x="360" y="890" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="912">F24 · Brute Force · T1110.004</text><text class="kc-ns" x="372" y="930">Post-DCSync PtH Validation</text><text class="kc-ns" x="372" y="944">Sweep (Paired Domain-Auth,</text><text class="kc-ns" x="372" y="958">localuser Excluded)</text></g>
+      <g class="kc-node np2" data-i="23"><rect x="34" y="890" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="912">F25 · Steal or Forge Auth… · T1649</text><text class="kc-ns" x="46" y="930">ADCS ESC8 on ARMORIQUE-CA (Web</text><text class="kc-ns" x="46" y="944">Enrollment over HTTP)</text></g>
+      <g class="kc-node np5" data-i="24"><rect x="34" y="1062" width="270" height="92" rx="6"/><text class="kc-nt" x="46" y="1084">F26 · Steal or Forge Kerb… · T1558.003</text><text class="kc-ns" x="46" y="1102">Constrained Delegation w/</text><text class="kc-ns" x="46" y="1116">Protocol Transition on a</text><text class="kc-ns" x="46" y="1130">Protected Users Member…</text></g>
+      <g class="kc-node np1" data-i="25"><rect x="360" y="1062" width="270" height="92" rx="6"/><text class="kc-nt" x="372" y="1084">F27 · File and Directory… · T1083</text><text class="kc-ns" x="372" y="1102">Authenticated Share Mining as</text><text class="kc-ns" x="372" y="1116">alambix — No Credentials</text><text class="kc-ns" x="372" y="1130">Surfaced</text></g>
+      <g class="kc-node np3" data-i="26"><rect x="686" y="1062" width="270" height="92" rx="6"/><text class="kc-nt" x="698" y="1084">F28 · OS Credential Dumpi… · T1003.006</text><text class="kc-ns" x="698" y="1102">alambix → ReadGMSAPassword →</text><text class="kc-ns" x="698" y="1116">gMSA-obelix$ DCSync →</text><text class="kc-ns" x="698" y="1130">armorique.local Forest…</text></g>
+      <g class="kc-node np5" data-i="27"><rect x="1012" y="1062" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="1084">F28 · OS Credential Dumpi… · T1003.006</text><text class="kc-ns" x="1024" y="1102">alambix → ReadGMSAPassword →</text><text class="kc-ns" x="1024" y="1116">gMSA-obelix$ DCSync →</text><text class="kc-ns" x="1024" y="1130">armorique.local Forest…</text></g>
+      <g class="kc-node np2" data-i="28"><rect x="1012" y="1234" width="270" height="92" rx="6"/><text class="kc-nt" x="1024" y="1256">ENUM</text><text class="kc-ns" x="1024" y="1274">Engagement closed; report</text><text class="kc-ns" x="1024" y="1288">finalized to v1.0 (DRAFT</text><text class="kc-ns" x="1024" y="1302">banner dropped); deliverable…</text></g>
+      </svg>
+    </div>
+    <div class="kc-detail">Press &#9654; or click a node to inspect the step.</div>
+  </div>
+  <script>
+  (function(){
+    var root = document.querySelector('#sec-replay .kc');
+    var data = JSON.parse(root.getAttribute('data-events'));
+    var edges = {}, elabels = {}, nodes = {};
+    root.querySelectorAll('.kc-edge').forEach(function(e){ edges[+e.getAttribute('data-i')] = e; });
+    root.querySelectorAll('.kc-elabel').forEach(function(e){ elabels[+e.getAttribute('data-i')] = e; });
+    root.querySelectorAll('.kc-node').forEach(function(n){ nodes[+n.getAttribute('data-i')] = n; });
+    var fill = root.querySelector('.kc-progress-fill');
+    var curEl = root.querySelector('.kc-cur');
+    var detail = root.querySelector('.kc-detail');
+    var playBtn = root.querySelector('[data-act=play]');
+    var idx = 0, timer = null, speed = 1, BASE = 1300;
+    function paint(){
+      for(var k in edges){ k=+k; edges[k].classList.toggle('fired', k<=idx); }
+      for(var k in elabels){ k=+k; elabels[k].classList.toggle('fired', k<=idx); }
+      for(var i in nodes){ i=+i; nodes[i].classList.toggle('on', i<=idx); nodes[i].classList.toggle('live', i===idx); }
+      fill.style.width = (data.length ? (idx/data.length*100) : 0) + '%';
+      curEl.textContent = idx;
+      if(idx>0){ var e=data[idx-1]; detail.innerHTML = '<b>'+e.t+'</b> &middot; '+e.x; }
+      else { detail.textContent = 'Press ▶ or click a node to inspect the step.'; }
+    }
+    function step(){ if(idx>=data.length){ stop(); return; } idx++; paint(); }
+    function play(){ if(timer) return; if(idx>=data.length) idx=0; playBtn.innerHTML='&#10073;&#10073; PAUSE'; timer=setInterval(step, BASE/speed); }
+    function stop(){ if(timer){ clearInterval(timer); timer=null; } playBtn.innerHTML='&#9654; PLAY'; }
+    root.querySelector('[data-act=play]').onclick=function(){ timer?stop():play(); };
+    root.querySelector('[data-act=reset]').onclick=function(){ stop(); idx=0; paint(); };
+    root.querySelector('[data-act=back]').onclick=function(){ stop(); if(idx>0) idx--; paint(); };
+    root.querySelector('[data-act=fwd]').onclick=function(){ stop(); step(); };
+    root.querySelectorAll('.kc-speed').forEach(function(b){ b.onclick=function(){
+      root.querySelectorAll('.kc-speed').forEach(function(x){x.classList.remove('sel');}); b.classList.add('sel');
+      speed=parseFloat(b.getAttribute('data-speed')); if(timer){ stop(); play(); }
+    };});
+    root.querySelector('.kc-progress').onclick=function(e){ stop(); var rc=this.getBoundingClientRect(); idx=Math.round((e.clientX-rc.left)/rc.width*data.length); idx=Math.max(0,Math.min(data.length,idx)); paint(); };
+    for(var i in nodes){ (function(n){ n.addEventListener('click', function(){ stop(); idx=+n.getAttribute('data-i'); paint(); }); })(nodes[i]); }
+    paint();
+  })();
+  </script>
 </section>
 
 
@@ -2100,24 +2337,20 @@ flowchart LR
   <p class="lede">Each card lists the per-host findings and the worst-case verdict.
   Click any card for the per-host drawer with the full finding list.</p>
   <div class="host-grid">
-    <div class="host dc host-clickable" data-host='{&quot;name&quot;: &quot;BABAORUM&quot;, &quot;ip&quot;: &quot;10.3.10.10&quot;, &quot;role&quot;: &quot;DC&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 12&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F01&lt;/b&gt; \u2014 LDAP Signing Not Required on Domain Controllers (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F03&lt;/b&gt; \u2014 LDAP Channel Binding Not Enforced (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F04&lt;/b&gt; \u2014 Anonymous SMB Session Permitted on Domain Controllers (Low)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F07&lt;/b&gt; \u2014 Guest-Readable Share Exposes Cleartext Credentials (rome.local) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F08&lt;/b&gt; \u2014 Guest Account Enabled with Empty Password on rome.local (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F14&lt;/b&gt; \u2014 LAPS Read Right Over-Delegated to Standard Domain User (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F17&lt;/b&gt; \u2014 Service Account Password Reuse Within rome.local (svc_wikijs \u2261 jesse2) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F18&lt;/b&gt; \u2014 Domain Compromise via jesse2 \u2192 DCSync Full NTDS Dump (rome.local) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F19&lt;/b&gt; \u2014 Cross-Forest Identity Password Reuse (No Trust) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F22&lt;/b&gt; \u2014 krbtgt Hashes Captured (Both Forests) \u2192 Golden Ticket Capability (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
-      <div class="name">BABAORUM <span class="ip">10.3.10.10</span></div>
-      <div class="role">DC</div>
+    <div class="host dc host-clickable" data-host='{&quot;name&quot;: &quot;Domain Controller&quot;, &quot;ip&quot;: &quot;10.3.10.10&quot;, &quot;role&quot;: &quot;BABAORUM&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 12&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F01&lt;/b&gt; \u2014 LDAP Signing Not Required on Domain Controllers (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F03&lt;/b&gt; \u2014 LDAP Channel Binding Not Enforced (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F04&lt;/b&gt; \u2014 Anonymous SMB Session Permitted on Domain Controllers (Low)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F07&lt;/b&gt; \u2014 Guest-Readable Share Exposes Cleartext Credentials (rome.local) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F08&lt;/b&gt; \u2014 Guest Account Enabled with Empty Password on rome.local (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F14&lt;/b&gt; \u2014 LAPS Read Right Over-Delegated to Standard Domain User (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F17&lt;/b&gt; \u2014 Service Account Password Reuse Within rome.local (svc_wikijs \u2261 jesse2) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F18&lt;/b&gt; \u2014 Domain Compromise via jesse2 \u2192 DCSync Full NTDS Dump (rome.local) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F19&lt;/b&gt; \u2014 Cross-Forest Identity Password Reuse (No Trust) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F22&lt;/b&gt; \u2014 krbtgt Hashes Captured (Both Forests) \u2192 Golden Ticket Capability (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
+      <div class="name">Domain Controller <span class="ip">10.3.10.10</span></div>
       <div class="verdict">Pwn3d — Critical findings present<div class="findings">12 findings · 5 Critical</div><div class="findings">F01, F03, F04, F07, F08, F14, F17, F18, F19, F22, F23, F24</div></div>
     </div>
-    <div class="host dc host-clickable" data-host='{&quot;name&quot;: &quot;VILLAGE&quot;, &quot;ip&quot;: &quot;10.3.10.13&quot;, &quot;role&quot;: &quot;DC&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 15&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F01&lt;/b&gt; \u2014 LDAP Signing Not Required on Domain Controllers (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F03&lt;/b&gt; \u2014 LDAP Channel Binding Not Enforced (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F04&lt;/b&gt; \u2014 Anonymous SMB Session Permitted on Domain Controllers (Low)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F05&lt;/b&gt; \u2014 Anonymous SMB Password-Policy Disclosure on armorique.local DC (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F06&lt;/b&gt; \u2014 Weak Domain Password Policy on armorique.local (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F19&lt;/b&gt; \u2014 Cross-Forest Identity Password Reuse (No Trust) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F20&lt;/b&gt; \u2014 armorique.local Forest Compromise via Cross-Forest Pass-the-Hash (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F21&lt;/b&gt; \u2014 gMSA-obelix$ Secret Recoverable from NTDS (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F22&lt;/b&gt; \u2014 krbtgt Hashes Captured (Both Forests) \u2192 Golden Ticket Capability (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F25&lt;/b&gt; \u2014 ADCS ESC8 on ARMORIQUE-CA (Web Enrollment over HTTP) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F26&lt;/b&gt; \u2014 Constrained Delegation w/ Protocol Transition on a Protected Users Member (alambix) (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F27&lt;/b&gt; \u2014 Authenticated Share Mining as alambix \u2014 No Credentials Surfaced (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F28&lt;/b&gt; \u2014 alambix \u2192 ReadGMSAPassword \u2192 gMSA-obelix$ DCSync \u2192 armorique.local Forest Compromise (Critical)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
-      <div class="name">VILLAGE <span class="ip">10.3.10.13</span></div>
-      <div class="role">DC</div>
+    <div class="host dc host-clickable" data-host='{&quot;name&quot;: &quot;Domain Controller&quot;, &quot;ip&quot;: &quot;10.3.10.13&quot;, &quot;role&quot;: &quot;VILLAGE&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 15&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F01&lt;/b&gt; \u2014 LDAP Signing Not Required on Domain Controllers (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F03&lt;/b&gt; \u2014 LDAP Channel Binding Not Enforced (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F04&lt;/b&gt; \u2014 Anonymous SMB Session Permitted on Domain Controllers (Low)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F05&lt;/b&gt; \u2014 Anonymous SMB Password-Policy Disclosure on armorique.local DC (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F06&lt;/b&gt; \u2014 Weak Domain Password Policy on armorique.local (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F19&lt;/b&gt; \u2014 Cross-Forest Identity Password Reuse (No Trust) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F20&lt;/b&gt; \u2014 armorique.local Forest Compromise via Cross-Forest Pass-the-Hash (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F21&lt;/b&gt; \u2014 gMSA-obelix$ Secret Recoverable from NTDS (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F22&lt;/b&gt; \u2014 krbtgt Hashes Captured (Both Forests) \u2192 Golden Ticket Capability (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F25&lt;/b&gt; \u2014 ADCS ESC8 on ARMORIQUE-CA (Web Enrollment over HTTP) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F26&lt;/b&gt; \u2014 Constrained Delegation w/ Protocol Transition on a Protected Users Member (alambix) (Medium)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F27&lt;/b&gt; \u2014 Authenticated Share Mining as alambix \u2014 No Credentials Surfaced (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F28&lt;/b&gt; \u2014 alambix \u2192 ReadGMSAPassword \u2192 gMSA-obelix$ DCSync \u2192 armorique.local Forest Compromise (Critical)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
+      <div class="name">Domain Controller <span class="ip">10.3.10.13</span></div>
       <div class="verdict">Pwn3d — Critical findings present<div class="findings">15 findings · 6 Critical</div><div class="findings">F01, F03, F04, F05, F06, F19, F20, F21, F22, F23, F24, F25, F26, F27, F28</div></div>
     </div>
-    <div class="host piv host-clickable" data-host='{&quot;name&quot;: &quot;METRONUM&quot;, &quot;ip&quot;: &quot;10.3.10.11&quot;, &quot;role&quot;: &quot;PIV&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 11&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F02&lt;/b&gt; \u2014 SMB Signing Not Required on Domain Member Servers (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F08&lt;/b&gt; \u2014 Guest Account Enabled with Empty Password on rome.local (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F09&lt;/b&gt; \u2014 Cleartext Credentials Stored on FTP Server (rome.local member) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F10&lt;/b&gt; \u2014 Local Administrator Compromise via Predictable Naming and Password Chain (METRONUM) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F11&lt;/b&gt; \u2014 Local SAM Hash Extraction Yields Administrator NT Hash (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F12&lt;/b&gt; \u2014 LSA Secrets Dump Exposes Cleartext Domain Password and Cached DCC2 Hashes (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F13&lt;/b&gt; \u2014 DPAPI Vault Decryption on METRONUM Yields lapsus Cleartext (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F14&lt;/b&gt; \u2014 LAPS Read Right Over-Delegated to Standard Domain User (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F17&lt;/b&gt; \u2014 Service Account Password Reuse Within rome.local (svc_wikijs \u2261 jesse2) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
-      <div class="name">METRONUM <span class="ip">10.3.10.11</span></div>
-      <div class="role">PIV</div>
+    <div class="host dc host-clickable" data-host='{&quot;name&quot;: &quot;Domain Controller&quot;, &quot;ip&quot;: &quot;10.3.10.11&quot;, &quot;role&quot;: &quot;METRONUM&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 11&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F02&lt;/b&gt; \u2014 SMB Signing Not Required on Domain Member Servers (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F08&lt;/b&gt; \u2014 Guest Account Enabled with Empty Password on rome.local (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F09&lt;/b&gt; \u2014 Cleartext Credentials Stored on FTP Server (rome.local member) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F10&lt;/b&gt; \u2014 Local Administrator Compromise via Predictable Naming and Password Chain (METRONUM) (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F11&lt;/b&gt; \u2014 Local SAM Hash Extraction Yields Administrator NT Hash (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F12&lt;/b&gt; \u2014 LSA Secrets Dump Exposes Cleartext Domain Password and Cached DCC2 Hashes (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F13&lt;/b&gt; \u2014 DPAPI Vault Decryption on METRONUM Yields lapsus Cleartext (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F14&lt;/b&gt; \u2014 LAPS Read Right Over-Delegated to Standard Domain User (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F17&lt;/b&gt; \u2014 Service Account Password Reuse Within rome.local (svc_wikijs \u2261 jesse2) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
+      <div class="name">Domain Controller <span class="ip">10.3.10.11</span></div>
       <div class="verdict">Pwn3d — Critical findings present<div class="findings">11 findings · 4 Critical</div><div class="findings">F02, F08, F09, F10, F11, F12, F13, F14, F17, F23, F24</div></div>
     </div>
-    <div class="host piv host-clickable" data-host='{&quot;name&quot;: &quot;REFERENDUM&quot;, &quot;ip&quot;: &quot;10.3.10.12&quot;, &quot;role&quot;: &quot;PIV&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 8&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F02&lt;/b&gt; \u2014 SMB Signing Not Required on Domain Member Servers (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F08&lt;/b&gt; \u2014 Guest Account Enabled with Empty Password on rome.local (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F14&lt;/b&gt; \u2014 LAPS Read Right Over-Delegated to Standard Domain User (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F15&lt;/b&gt; \u2014 LAPS-Recovered Local Admin on REFERENDUM (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F16&lt;/b&gt; \u2014 REFERENDUM Secretsdump Yields jules.cesar Cleartext (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F17&lt;/b&gt; \u2014 Service Account Password Reuse Within rome.local (svc_wikijs \u2261 jesse2) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
-      <div class="name">REFERENDUM <span class="ip">10.3.10.12</span></div>
-      <div class="role">PIV</div>
+    <div class="host dc host-clickable" data-host='{&quot;name&quot;: &quot;Domain Controller&quot;, &quot;ip&quot;: &quot;10.3.10.12&quot;, &quot;role&quot;: &quot;REFERENDUM&quot;, &quot;detail&quot;: &quot;&lt;h4&gt;Findings \u00b7 8&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;F02&lt;/b&gt; \u2014 SMB Signing Not Required on Domain Member Servers (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F08&lt;/b&gt; \u2014 Guest Account Enabled with Empty Password on rome.local (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F14&lt;/b&gt; \u2014 LAPS Read Right Over-Delegated to Standard Domain User (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F15&lt;/b&gt; \u2014 LAPS-Recovered Local Admin on REFERENDUM (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F16&lt;/b&gt; \u2014 REFERENDUM Secretsdump Yields jules.cesar Cleartext (Critical)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F17&lt;/b&gt; \u2014 Service Account Password Reuse Within rome.local (svc_wikijs \u2261 jesse2) (High)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F23&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth (Informational)&lt;/li&gt;&lt;li&gt;&lt;b&gt;F24&lt;/b&gt; \u2014 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) (Informational)&lt;/li&gt;&lt;/ul&gt;&quot;}'>
+      <div class="name">Domain Controller <span class="ip">10.3.10.12</span></div>
       <div class="verdict">Pwn3d — Critical findings present<div class="findings">8 findings · 2 Critical</div><div class="findings">F02, F08, F14, F15, F16, F17, F23, F24</div></div>
     </div></div>
 </section>
@@ -2253,76 +2486,29 @@ flowchart LR
 
 
 <section class="reveal" id="sec-chains">
-  <div class="section-tag">// 07 · attack chains · independent paths to forest DA</div>
-  <h2>Two chains. <em>Both</em> ended in krbtgt.</h2>
-  <p class="lede">Two completely independent paths to dual-forest Domain Admin. Each chain is
-  self-contained: removing every step of one does not break the other.</p>
+  <div class="section-tag">// 07 · attack chains · how compromise was reached</div>
+  <h2>The path to compromise.</h2>
+  <p class="lede">The compromise path, synthesized from the ordered findings. Each step is a proven transition documented in the detailed findings.</p>
   <div class="chain-grid">
-    <div class="chain"><div class="n">Chain A · Guest fallback → cross-forest pwn <span class="p">CLEARED</span></div>
-      <div class="s">Anonymous SMB → Guest-readable share <code>infos.txt</code> → FTP cleartext <code>plans.txt</code>
-      → local-admin via predictable username + leaked password → SAM + LSA dump → cleartext domain user
-      → DPAPI vault → LAPS over-delegation → REFERENDUM secretsdump → <code>jesse</code> identity password reuse
-      across forests → PtH armorique.local DC → DCSync both forests.</div>
-      <div class="bar"><i style="width:100%"></i></div>
-    </div>
-    <div class="chain"><div class="n">Chain B · alambix → gMSA → DCSync <span class="p">CLEARED</span></div>
-      <div class="s">A regular Protected-Users-bound domain user (<code>alambix</code>) holds
-      <code>ReadGMSAPassword</code> on <code>gMSA-obelix$</code> → extract current gMSA NT hash →
-      <code>gMSA-obelix$</code> has <code>GetChanges + GetChangesAll</code> directly on the domain root →
-      DCSync → full armorique.local NTDS. Two AD over-delegations stacked on a non-admin user.
-      Independent of Chain A — never touches <code>jesse</code> or rome.local.</div>
-      <div class="bar"><i style="width:100%"></i></div>
-    </div>
+    <div class="chain"><div class="n">Primary chain <span class="p">PARTIAL</span></div><div class="s">F01 LDAP Signing Not Required on Domain Controllers → F02 SMB Signing Not Required on Domain Member Servers → F03 LDAP Channel Binding Not Enforced → F04 Anonymous SMB Session Permitted on Domain Controllers → F05 Anonymous SMB Password-Policy Disclosure on armorique.local DC → F06 Weak Domain Password Policy on armorique.local → F07 Guest-Readable Share Exposes Cleartext Credentials (rome.local) → F08 Guest Account Enabled with Empty Password on rome.local → F09 Cleartext Credentials Stored on FTP Server (rome.local member) → F10 Local Administrator Compromise via Predictable Naming and Password Chain (METRONUM) → F11 Local SAM Hash Extraction Yields Administrator NT Hash → F12 LSA Secrets Dump Exposes Cleartext Domain Password and Cached DCC2 Hashes → F13 DPAPI Vault Decryption on METRONUM Yields lapsus Cleartext → F14 LAPS Read Right Over-Delegated to Standard Domain User → F15 LAPS-Recovered Local Admin on REFERENDUM → F16 REFERENDUM Secretsdump Yields jules.cesar Cleartext → F17 Service Account Password Reuse Within rome.local (svc_wikijs ≡ jesse2) → F18 Domain Compromise via jesse2 → DCSync Full NTDS Dump (rome.local) → F19 Cross-Forest Identity Password Reuse (No Trust) → F20 armorique.local Forest Compromise via Cross-Forest Pass-the-Hash → F21 gMSA-obelix$ Secret Recoverable from NTDS → F22 krbtgt Hashes Captured (Both Forests) → Golden Ticket Capability → F23 Post-DCSync PtH Validation Sweep Confirms Domain-Wide Breadth → F24 Post-DCSync PtH Validation Sweep (Paired Domain-Auth, localuser Excluded) → F25 ADCS ESC8 on ARMORIQUE-CA (Web Enrollment over HTTP) → F26 Constrained Delegation w/ Protocol Transition on a Protected Users Member (alambix) → F27 Authenticated Share Mining as alambix — No Credentials Surfaced → F28 alambix → ReadGMSAPassword → gMSA-obelix$ DCSync → armorique.local Forest Compromise → <b>objective</b></div><div class="bar"><i style="width:100%"></i></div></div>
   </div>
 </section>
 
 
-<section class="reveal" id="sec-dead-ends">
-  <div class="section-tag">// 08 · dead ends · paths that didn't pan out</div>
-  <h2>What we ruled out.</h2>
-  <p class="lede">Operator methodology requires showing the ground we tested and ruled out. These attempts
-  failed for reasons that are themselves engagement findings (defense-in-depth working, neutralized
-  misconfigurations, hardened endpoints).</p>
-  <div class="reject">
-    <span class="cid">DEAD END 1</span> · <span class="bad">jesse:[REDACTED-PASSWORD] — incorrect credential</span>
-    <div class="why">Operator-supplied guess cracked against jesse's cached DCC2 hash and tested via NTLM SMB,
-    LDAP, WinRM, and Kerberos AS-REQ across all 4 in-scope hosts on both forests. Multiple verified offline
-    and online; the password belongs to <code>jesse2</code> + <code>svc_wikijs</code> (intra-domain password
-    collision), not <code>jesse</code>.</div>
-  </div>
-  <div class="reject">
-    <span class="cid">DEAD END 2</span> · <span class="bad">S4U2Self+S4U2Proxy on alambix — KDC_ERR_BADOPTION</span>
-    <div class="why">alambix has <code>TRUSTED_TO_AUTH_FOR_DELEGATION</code> + a constrained-delegation target
-    of <code>CIFS/armorique.armorique.local</code> (the DC), but is also in <b>Protected Users</b>. Protected
-    Users makes the user's TGT non-forwardable by design, so S4U2Proxy fails. Defense-in-depth working —
-    the misconfiguration is neutralized, not exploitable.</div>
-  </div>
-  <div class="reject">
-    <span class="cid">DEAD END 3</span> · <span class="bad">Kerberoast in armorique.local · no usable hashes</span>
-    <div class="why">Only SPN-bearing principal in armorique.local besides krbtgt is <code>alambix</code> itself.
-    Roasting <code>CIFS/aleem.armorique.local</code> via <code>prolix</code> as a regular Authenticated User
-    returned an RC4-HMAC TGS (despite Protected Users on alambix), but offline crack against the lab-themed
-    wordlist returned no hit. Hash recovered via DCSync instead.</div>
-  </div>
-  <div class="reject">
-    <span class="cid">DEAD END 4</span> · <span class="bad">Password spray against 27 armorique.local users · no hits</span>
-    <div class="why">3 patterns × 27 users via authenticated SMB (Welcome1, Password1, Lehack2024, asterix-cast
-    names, Capitalized + year suffix, Monday-themed). Zero hits. Triggered the pivot to BloodHound shortest-path
-    analysis (per the saved feedback rule).</div>
-  </div>
-  <div class="reject">
-    <span class="cid">DEAD END 5</span> · <span class="bad">VILLAGE SYSVOL/NETLOGON share spider · no creds found</span>
-    <div class="why">Authenticated spider as alambix returned 9 benign GPO templates + 1 empty bait file.
-    No <code>Groups.xml</code> with GPP cpassword, no <code>Registry.xml</code> with AutoLogon, no login
-    scripts with embedded creds. Clean SYSVOL hygiene — a defensive strength.</div>
-  </div>
-  <div class="reject">
-    <span class="cid">DEAD END 6</span> · <span class="bad">DCSync as lapsus → ERROR_DS_DRA_BAD_DN</span>
-    <div class="why">lapsus is a regular domain user with LAPS-read on two hosts but no replication rights.
-    DCSync attempt returned DRSR DN error (not access-denied); lapsus is not tier-0. Resolved by reaching
-    DA via jesse2 (granted DA membership during engagement window for demonstration purposes — disclosed
-    in F18).</div>
-  </div>
+
+<section class="reveal" id="sec-strengths" style="background: linear-gradient(180deg, rgba(0,255,156,.03), transparent 50%);">
+  <div class="section-tag">// 09 · strengths · what held</div>
+  <h2>Controls that <em>worked</em>.</h2>
+  <p class="lede">Defenses that blocked or slowed the operator. Recording these is as much a finding as the failures.</p>
+  <ul class="strengths">
+    <li><b>Member-server SMB signing on the DCs (BABAORUM, VILLAGE).</b> Both DCs report <code>signing:True</code> — direct SMB relay against the domain controllers is not possible. The relay surface is restricted to the two member servers (METRONUM, REFERENDUM — F02).</li>
+    <li><b>LAPS deployed on METRONUM and REFERENDUM.</b> Local-administrator passwords are unique per host and auto-rotated. The compromise path required pivoting through a delegated reader (<code>lapsus</code>); the LAPS rotation itself is sound. The over-delegation of <em>read</em> (F14) is the issue, not the rotation.</li>
+    <li><b>Protected Users membership on <code>alambix</code>.</b> Correctly blocks NTLM authentication (<code>STATUS_ACCOUNT_RESTRICTION</code>), RC4 Kerberos pre-auth (<code>KDC_ERR_ETYPE_NOSUPP</code>), and S4U2Proxy delegation (<code>KDC_ERR_BADOPTION</code>, &quot;initial TGT not forwardable&quot;). This single setting neutralizes the F26 constrained-delegation misconfiguration that would otherwise be a one-shot path to forest compromise — defense by accident, but defense nonetheless.</li>
+    <li><b><code>armorique.local</code> SYSVOL hygiene.</b> No <code>Groups.xml</code> cpassword, no <code>Registry.xml</code> AutoLogon, no embedded credentials in login scripts. The F27 spider over every readable share as <code>alambix</code> produced 10 files totalling ~11 KiB of stock GPO templates and CA artifacts — rare in CTF environments and worth calling out.</li>
+    <li><b><code>armorique.local</code> Guest account disabled.</b> The Guest-fallback anti-pattern that anchored Chain A is restricted to <code>rome.local</code>. <code>armorique.local</code> correctly rejects empty-password Guest authentication (F08 does not extend to it).</li>
+    <li><b>Tier-0 ACL restrictions on <code>rome.local</code> (partial).</b> The DCSync attempt as <code>lapsus</code> failed with DRSR access denied before <code>jesse2</code> was elevated to Domain Admins — indicating the replication right is not casually delegated on <code>rome.local</code>. (The <code>armorique.local</code> equivalent failed: see F28 for the gMSA-obelix$ direct ACE.)</li>
+    <li><b>No active LLMNR/NBT-NS poisoning surface observed in-scope.</b> Responder runs during initial recon did not surface poisonable name-resolution traffic from in-scope hosts. Name-resolution poisoning is not a viable initial-access primitive in this environment.</li>
+  </ul>
 </section>
 
 
@@ -2330,10 +2516,7 @@ flowchart LR
   <div class="section-tag">// engagement file closed · 2026-05-22 utc</div>
   <h2 class="big">Lehack2024 — <em>resolved</em>.</h2>
   <p class="caption">
-    Two independent paths to dual-forest Domain Admin. krbtgt extracted in both forests.
-    Cross-forest identity password reuse documented. gMSA + ReadGMSAPassword over-delegation
-    isolated as a parallel compromise primitive. Fully reproducible via the commands and
-    evidence files in this casebook.
+    28 findings — 12 Critical, 8 High. Findings documented across the in-scope estate. Every step is reproducible via the commands and evidence files in this casebook; rotate all exposed secrets and re-test to confirm the chain is broken.
   </p>
   <div style="margin-top: 42px; padding-top: 28px; border-top: 1px solid var(--line-2); display: inline-flex; flex-direction: column; gap: 6px; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .22em; color: var(--muted); text-transform: uppercase;">
     <span>Signed &nbsp;<b style="color:var(--text); letter-spacing:.3em;">JESSE MOORE</b></span>
